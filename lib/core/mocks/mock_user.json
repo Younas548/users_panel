@@ -1,0 +1,7 @@
+{
+  "name": "Muhammad Ali",
+  "saved": [
+    {"id":"home","name":"Home","address":"Model Town","lat":32.100,"lng":74.870},
+    {"id":"work","name":"Work","address":"College Rd","lat":32.110,"lng":74.880}
+  ]
+}
