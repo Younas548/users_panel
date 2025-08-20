@@ -3,10 +3,32 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../app/routes.dart';
-import '../../../../core/utils/formatters.dart';
-import '../../../../core/data/models/ride_type.dart';
-import '../../../../core/data/repositories/ride_repository.dart';
+import '../../../../core/data/models/ride_type.dart'; // <- we will pass a RideType to state
 import '../../../state/ride_state.dart';
+
+// ----- Fixed three options -----
+class _Option {
+  final String code;      // 'rickshaw' | 'every' | 'bike'
+  final String label;     // human readable for RideType
+  final String asset;     // asset path
+  final int base;         // base fare (for summary)
+  final int etaMin;       // ETA minutes
+  const _Option({
+    required this.code,
+    required this.label,
+    required this.asset,
+    required this.base,
+    required this.etaMin,
+  });
+
+  RideType toRideType() => RideType(
+        code: code,
+        label: label,
+        base: base,
+        etaMin: etaMin,
+        perKm: 0, // TODO: Replace 0 with the correct perKm value if needed
+      );
+}
 
 class RideOptionsScreen extends StatefulWidget {
   const RideOptionsScreen({super.key});
@@ -17,84 +39,59 @@ class RideOptionsScreen extends StatefulWidget {
 
 class _RideOptionsScreenState extends State<RideOptionsScreen>
     with SingleTickerProviderStateMixin {
-  final _repo = MockRideRepository();
+  // FIXED: Rickshaw, Every (car/van), Bike
+  final List<_Option> _options = const [
+    _Option(
+      code: 'rickshaw',
+      label: 'Rickshaw',
+      asset: 'assets/images/rikshaw.JPEG',
+      base: 132,
+      etaMin: 2,
+    ),
+    _Option(
+      code: 'every',
+      label: 'Every',
+      asset: 'assets/images/copy.png',
+      base: 231,
+      etaMin: 1,
+    ),
+    _Option(
+      code: 'bike',
+      label: 'Bike',
+      asset: 'assets/images/copy1.png',
+      base: 88,
+      etaMin: 3,
+    ),
+  ];
 
-  List<RideType> _types = [];
-  RideType? _selected;
+  int _selectedIdx = 0;
 
-  bool _loading = true;
-  String? _error;
-
-  // local override for destination text (changed via bottom sheet)
-  String? _dstOverride;
-
-  // top car “enlarge” animation
+  // top preview scale animation
   late final AnimationController _carCtrl =
       AnimationController(vsync: this, duration: const Duration(milliseconds: 220));
   late final Animation<double> _carScale =
-      Tween(begin: 0.95, end: 1.12).animate(CurvedAnimation(parent: _carCtrl, curve: Curves.easeOut));
+      Tween(begin: 0.95, end: 1.12).animate(
+        CurvedAnimation(parent: _carCtrl, curve: Curves.easeOut),
+      );
 
-  @override
-  void initState() {
-    super.initState();
-    _load();
-  }
-
-  Future<void> _load() async {
-    setState(() {
-      _loading = true;
-      _error = null;
-    });
-    try {
-      final t = await _repo.getRideTypes();
-      if (!mounted) return;
-      setState(() {
-        _types = t;
-        _selected = t.isNotEmpty ? t.first : null;
-        _loading = false;
-      });
-    } catch (e) {
-      setState(() {
-        _error = 'Could not load rides. Pull to retry.';
-        _loading = false;
-      });
-    }
-  }
-
-  void _onSelect(RideType t) {
-    if (_selected?.code != t.code) {
+  void _onSelect(int idx) {
+    if (_selectedIdx != idx) {
       HapticFeedback.selectionClick();
-      // animate the big icon
       _carCtrl.forward(from: 0);
-    }
-    setState(() => _selected = t);
-  }
-
-  Future<void> _changeDestination() async {
-    // If you already have a search route, you can simply do:
-    // final result = await Navigator.pushNamed(context, Routes.search);
-    // if (result is Place) context.read<RideState>().setDestination(result);
-    // else if (result is String) setState(() => _dstOverride = result);
-
-    final text = await showModalBottomSheet<String>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (_) => const _DestinationSheet(),
-    );
-
-    if (text != null && text.trim().isNotEmpty) {
-      setState(() => _dstOverride = text.trim());
+      setState(() => _selectedIdx = idx);
     }
   }
 
   void _onConfirm() {
-    if (_selected == null) return;
-    final total = _selected!.base + 120; // keep your sample calc
+    final sel = _options[_selectedIdx];
+    final rideType = sel.toRideType(); // convert to your RideType model
+
+    // Use your existing RideState methods (no setRideTypeCode)
     context.read<RideState>()
-      ..setRideType(_selected!)
-      ..setEta(_selected!.etaMin)
-      ..setPrice(total);
+      ..setRideType(rideType)
+      ..setEta(sel.etaMin)
+      ..setPrice(sel.base + 120); // sample calc; adjust as needed
+
     Navigator.pushNamed(context, Routes.confirmPickup);
   }
 
@@ -107,9 +104,10 @@ class _RideOptionsScreenState extends State<RideOptionsScreen>
   @override
   Widget build(BuildContext context) {
     final ride = context.watch<RideState>();
-    final dst = _dstOverride ?? (ride.destination?.name ?? 'Select destination');
     final pickup = ride.pickup?.name ?? 'Near your location';
-    final eta = _selected?.etaMin ?? 1;
+    final dst = ride.destination?.name ?? 'Select destination';
+
+    final selected = _options[_selectedIdx];
 
     const pageBg = Color(0xFFF4FAFD);
 
@@ -121,84 +119,104 @@ class _RideOptionsScreenState extends State<RideOptionsScreen>
         elevation: 0,
         title: const Text('Choose your ride'),
       ),
-      body: RefreshIndicator(
-        onRefresh: _load,
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(16, 10, 16, 16),
-          children: [
-            _RouteCard(
-              pickup: pickup,
-              destination: dst,
-              onChangeDestination: _changeDestination,
-            ),
-            const SizedBox(height: 18),
+      body: ListView(
+        padding: const EdgeInsets.fromLTRB(16, 10, 16, 16),
+        children: [
+          // Top route summary (no "Change" button)
+          _RouteCard(pickup: pickup, destination: dst),
+          const SizedBox(height: 18),
 
-            // ======= Big vehicle + ETA chip (like your pic 2) =======
-            SizedBox(
-              height: 230,
-              child: Stack(
-                alignment: Alignment.center,
-                children: [
-                  // outer halo
-                  Container(
-                    width: 220,
-                    height: 220,
-                    decoration: const BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Color(0xFFE7F2FB),
+          // ======= Big vehicle + ETA chip =======
+          SizedBox(
+            height: 230,
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                Container(
+                  width: 220,
+                  height: 220,
+                  decoration: const BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Color(0xFFE7F2FB),
+                  ),
+                ),
+                Container(
+                  width: 150,
+                  height: 150,
+                  decoration: const BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Color(0xFFEDF6FF),
+                  ),
+                ),
+                Positioned(
+                  left: 24,
+                  top: 28,
+                  child: _EtaChip(text: '${selected.etaMin} min'),
+                ),
+                ScaleTransition(
+                  scale: _carScale,
+                  child: _VehicleImage(
+                    assetPath: selected.asset,
+                    size: 100,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 8),
+
+          // ======= Three cards with ONLY images =======
+          SizedBox(
+            height: 130,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: 4),
+              itemCount: _options.length,
+              separatorBuilder: (_, __) => const SizedBox(width: 12),
+              itemBuilder: (_, i) {
+                final isSelected = _selectedIdx == i;
+                final opt = _options[i];
+                return InkWell(
+                  borderRadius: BorderRadius.circular(18),
+                  onTap: () => _onSelect(i),
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 180),
+                    width: 130,
+                    padding: const EdgeInsets.fromLTRB(12, 12, 12, 10),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(18),
+                      border: Border.all(
+                        color: isSelected
+                            ? const Color(0xFF2B6BEA)
+                            : const Color(0xFFE7EEF5),
+                        width: isSelected ? 2 : 1,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.05),
+                          blurRadius: 12,
+                          offset: const Offset(0, 6),
+                        ),
+                      ],
                     ),
+                    // Only the image (no labels, no PKR)
+                    child: Center(child: _VehicleImage(assetPath: opt.asset, size: 60)),
                   ),
-                  // inner halo
-                  Container(
-                    width: 150,
-                    height: 150,
-                    decoration: const BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Color(0xFFEDF6FF),
-                    ),
-                  ),
-                  // ETA chip
-                  Positioned(
-                    left: 24,
-                    top: 28,
-                    child: _EtaChip(text: '$eta min'),
-                  ),
-                  // big car icon — scales slightly when you select a tile
-                  ScaleTransition(
-                    scale: _carScale,
-                    child: const Icon(Icons.directions_car_filled, size: 78, color: Color.fromARGB(255, 224, 10, 135)),
-                  ),
-                ],
-              ),
+                );
+              },
             ),
-            const SizedBox(height: 8),
+          ),
 
-            // ======= Horizontal ride options =======
-            if (_loading)
-              const _LoadingRow()
-            else if (_error != null)
-              _ErrorBox(message: _error!, onRetry: _load)
-            else if (_types.isEmpty)
-              const _EmptyBox()
-            else
-              _RideSelector(
-                types: _types,
-                selected: _selected,
-                onSelect: _onSelect,
-              ),
+          const SizedBox(height: 18),
 
-            const SizedBox(height: 18),
-
-            // ======= Green price bar + confirm =======
-            _ConfirmCard(
-              priceText: _selected == null
-                  ? 'Select a ride'
-                  : Formatters.currency(_selected!.base + 120),
-              enabled: _selected != null,
-              onPressed: _onConfirm,
-            ),
-          ],
-        ),
+          // ======= Green price bar + confirm =======
+          _ConfirmCard(
+            priceText: 'Rs. ${selected.base + 120}', // show final total
+            enabled: true,
+            onPressed: _onConfirm,
+          ),
+        ],
       ),
     );
   }
@@ -210,17 +228,15 @@ class _RouteCard extends StatelessWidget {
   const _RouteCard({
     required this.pickup,
     required this.destination,
-    required this.onChangeDestination,
   });
 
   final String pickup;
   final String destination;
-  final VoidCallback onChangeDestination;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.fromLTRB(16, 14, 6, 14),
+      padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(24),
@@ -252,7 +268,6 @@ class _RouteCard extends StatelessWidget {
               ],
             ),
           ),
-          TextButton(onPressed: onChangeDestination, child: const Text('Change')),
         ],
       ),
     );
@@ -266,7 +281,8 @@ class _Dot extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 16, height: 16,
+      width: 16,
+      height: 16,
       decoration: BoxDecoration(
         color: color,
         shape: BoxShape.circle,
@@ -281,10 +297,12 @@ class _Line extends StatelessWidget {
   final String text;
   @override
   Widget build(BuildContext context) {
-    return Text(text,
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-        style: const TextStyle(fontSize: 16.5, fontWeight: FontWeight.w600));
+    return Text(
+      text,
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+      style: const TextStyle(fontSize: 16.5, fontWeight: FontWeight.w600),
+    );
   }
 }
 
@@ -312,78 +330,26 @@ class _EtaChip extends StatelessWidget {
         children: [
           const Icon(Icons.timer_outlined, size: 16),
           const SizedBox(width: 6),
-          Text(text,
-              style: const TextStyle(fontWeight: FontWeight.w700)),
+          Text(text, style: const TextStyle(fontWeight: FontWeight.w700)),
         ],
       ),
     );
   }
 }
 
-class _RideSelector extends StatelessWidget {
-  const _RideSelector({
-    required this.types,
-    required this.selected,
-    required this.onSelect,
-  });
-
-  final List<RideType> types;
-  final RideType? selected;
-  final void Function(RideType) onSelect;
+class _VehicleImage extends StatelessWidget {
+  const _VehicleImage({required this.assetPath, this.size = 80});
+  final String assetPath;
+  final double size;
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 130,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 4),
-        itemCount: types.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 12),
-        itemBuilder: (_, i) {
-          final t = types[i];
-          final isSelected = selected?.code == t.code;
-
-          return InkWell(
-            borderRadius: BorderRadius.circular(18),
-            onTap: () => onSelect(t),
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 180),
-              width: 130,
-              padding: const EdgeInsets.fromLTRB(12, 12, 12, 10),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(18),
-                border: Border.all(
-                  color: isSelected ? const Color(0xFF2B6BEA) : const Color(0xFFE7EEF5),
-                  width: isSelected ? 2 : 1,
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
-                    blurRadius: 12,
-                    offset: const Offset(0, 6),
-                  ),
-                ],
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Icon(Icons.directions_car_filled, size: 30, color: const Color.fromARGB(255, 43, 234, 75)),
-                  const SizedBox(height: 10),
-                  Text(t.label, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.w600)),
-                  const SizedBox(height: 2),
-                  Text(
-                    // “PKR 180” style like your screenshot
-                    Formatters.currency(t.base).replaceAll('Rs.', 'PKR'),
-                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
-                  ),
-                ],
-              ),
-            ),
-          );
-        },
-      ),
+    return Image.asset(
+      assetPath,
+      width: size,
+      height: size,
+      fit: BoxFit.contain,
+      errorBuilder: (_, __, ___) => const Icon(Icons.image_not_supported_outlined),
     );
   }
 }
@@ -428,7 +394,10 @@ class _ConfirmCard extends StatelessWidget {
               child: Text(
                 priceText,
                 style: const TextStyle(
-                    color: Colors.white, fontSize: 22, fontWeight: FontWeight.w800),
+                  color: Colors.white,
+                  fontSize: 22,
+                  fontWeight: FontWeight.w800,
+                ),
               ),
             ),
           ),
@@ -447,133 +416,6 @@ class _ConfirmCard extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _LoadingRow extends StatelessWidget {
-  const _LoadingRow();
-  @override
-  Widget build(BuildContext context) {
-    Widget skel() => Container(
-          width: 130,
-          height: 120,
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(18),
-          ),
-        );
-    return SizedBox(
-      height: 130,
-      child: Row(
-        children: [
-          skel(), const SizedBox(width: 12), skel(), const SizedBox(width: 12), skel(),
-        ],
-      ),
-    );
-  }
-}
-
-class _EmptyBox extends StatelessWidget {
-  const _EmptyBox();
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 110,
-      alignment: Alignment.center,
-      child: const Text('No rides available. Pull to refresh.'),
-    );
-  }
-}
-
-class _ErrorBox extends StatelessWidget {
-  const _ErrorBox({required this.message, required this.onRetry});
-  final String message;
-  final VoidCallback onRetry;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: const Color(0xFFFFF3F3),
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Row(
-        children: [
-          const Icon(Icons.error_outline, color: Colors.redAccent),
-          const SizedBox(width: 10),
-          Expanded(child: Text(message)),
-          TextButton(onPressed: onRetry, child: const Text('Retry')),
-        ],
-      ),
-    );
-  }
-}
-
-/* ===== bottom sheet to change destination (inline & simple) ===== */
-
-class _DestinationSheet extends StatefulWidget {
-  const _DestinationSheet();
-
-  @override
-  State<_DestinationSheet> createState() => _DestinationSheetState();
-}
-
-class _DestinationSheetState extends State<_DestinationSheet> {
-  final _c = TextEditingController();
-
-  @override
-  Widget build(BuildContext context) {
-    final viewInsets = MediaQuery.of(context).viewInsets.bottom;
-    return Padding(
-      padding: EdgeInsets.only(bottom: viewInsets),
-      child: Container(
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
-        ),
-        padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(width: 48, height: 5, decoration: BoxDecoration(
-              color: const Color(0xFFE1E6EC), borderRadius: BorderRadius.circular(4))),
-            const SizedBox(height: 12),
-            const Text('Change destination',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
-            const SizedBox(height: 10),
-            TextField(
-              controller: _c,
-              autofocus: true,
-              decoration: InputDecoration(
-                hintText: 'Enter destination…',
-                prefixIcon: const Icon(Icons.place_outlined),
-                filled: true,
-                fillColor: const Color(0xFFF5F7FA),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(14),
-                  borderSide: BorderSide.none,
-                ),
-              ),
-              onSubmitted: (v) => Navigator.pop(context, v),
-            ),
-            const SizedBox(height: 12),
-            SizedBox(
-              width: double.infinity,
-              height: 48,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF2B6BEA),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                ),
-                onPressed: () => Navigator.pop(context, _c.text),
-                child: const Text('Save'),
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }
