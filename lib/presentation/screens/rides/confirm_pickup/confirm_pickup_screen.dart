@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../app/routes.dart';
-import '../../../../core/utils/validators.dart';
+// validators import hata diya kyun ke ab use nahi ho raha
 import '../../../state/ride_state.dart';
 import '../../../widgets/map/map_stub.dart';
 
@@ -38,7 +38,7 @@ class _ConfirmPickupScreenState extends State<ConfirmPickupScreen> {
           const MapStub(height: 220, overlay: SizedBox()),
           const SizedBox(height: 12),
 
-          // Pickup / Destination summary (from your second snippet)
+          // Pickup / Destination summary
           const ListTile(
             leading: Icon(Icons.my_location),
             title: Text('Pickup'),
@@ -52,7 +52,6 @@ class _ConfirmPickupScreenState extends State<ConfirmPickupScreen> {
 
           const SizedBox(height: 12),
 
-          // Your original destination line (kept minimal for context)
           Text(
             'Destination: $destName',
             style: const TextStyle(fontWeight: FontWeight.w600),
@@ -60,7 +59,7 @@ class _ConfirmPickupScreenState extends State<ConfirmPickupScreen> {
 
           const SizedBox(height: 12),
 
-          // Your original form + validator (note to driver)
+          // NOTE OPTIONAL: validator hata diya, label me (optional) add
           Form(
             key: _form,
             child: TextFormField(
@@ -68,16 +67,16 @@ class _ConfirmPickupScreenState extends State<ConfirmPickupScreen> {
               maxLines: 3,
               decoration: const InputDecoration(
                 hintText: 'Note to driver (e.g., Gate no. 3)',
-                labelText: 'Note to driver',
+                labelText: 'Note to driver (optional)',
                 border: OutlineInputBorder(),
               ),
-              validator: Validators.notEmpty,
+              // <- koi validator nahi, is liye optional
             ),
           ),
         ],
       ),
 
-      // Bottom CTA (merged behavior: validate, then go to finding driver)
+      // Bottom CTA: bina validate kiye next page
       bottomNavigationBar: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(12),
@@ -87,9 +86,9 @@ class _ConfirmPickupScreenState extends State<ConfirmPickupScreen> {
               icon: const Icon(Icons.search),
               label: const Text('Find a driver'),
               onPressed: () {
-                if (_form.currentState?.validate() ?? false) {
-                  Navigator.pushNamed(context, Routes.findingDriver);
-                }
+                // Agar future me note save karna ho to yahan se ride state me bhej dein (optional)
+                // context.read<RideState>().setNote(_note.text.trim());
+                Navigator.pushNamed(context, Routes.findingDriver);
               },
             ),
           ),

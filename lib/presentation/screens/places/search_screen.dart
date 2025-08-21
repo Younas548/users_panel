@@ -96,7 +96,7 @@ class _SearchScreenState extends State<SearchScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final t = Theme.of(context).textTheme;
+   // final t = Theme.of(context).textTheme;
     final c = Theme.of(context).colorScheme;
 
     return Scaffold(
@@ -197,12 +197,12 @@ class _BodySearchField extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: c.surface.withOpacity(.9),
+        color: c.surface.withValues(alpha: .9),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: c.outlineVariant.withOpacity(.6)),
+        border: Border.all(color: c.outlineVariant.withValues(alpha: .6)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(.05),
+            color: Colors.black.withValues(alpha: .05),
             blurRadius: 12,
             offset: const Offset(0, 6),
           ),
@@ -363,7 +363,7 @@ class _PlaceTile extends StatelessWidget {
                 width: 40,
                 height: 40,
                 decoration: BoxDecoration(
-                  color: c.primary.withOpacity(.10),
+                  color: c.primary.withValues(alpha: .10),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(Icons.place_outlined, color: c.primary),

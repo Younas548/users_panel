@@ -87,7 +87,7 @@ class InRideScreen extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _titleBold('Ali Khan', context, maxLines: 1),
+                        _titleBold('Arslan Aslam', context, maxLines: 1),
                         const SizedBox(height: 2),
                         Row(
                           mainAxisSize: MainAxisSize.min,

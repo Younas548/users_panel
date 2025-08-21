@@ -3,16 +3,16 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../app/routes.dart';
-import '../../../../core/data/models/ride_type.dart'; // <- we will pass a RideType to state
+import '../../../../core/data/models/ride_type.dart';
 import '../../../state/ride_state.dart';
 
 // ----- Fixed three options -----
 class _Option {
-  final String code;      // 'rickshaw' | 'every' | 'bike'
-  final String label;     // human readable for RideType
-  final String asset;     // asset path
-  final int base;         // base fare (for summary)
-  final int etaMin;       // ETA minutes
+  final String code;
+  final String label;
+  final String asset;
+  final int base;
+  final int etaMin;
   const _Option({
     required this.code,
     required this.label,
@@ -26,12 +26,13 @@ class _Option {
         label: label,
         base: base,
         etaMin: etaMin,
-        perKm: 0, // TODO: Replace 0 with the correct perKm value if needed
+        perKm: 0,
       );
 }
 
 class RideOptionsScreen extends StatefulWidget {
-  const RideOptionsScreen({super.key});
+  const RideOptionsScreen({super.key, this.initialIndex});
+  final int? initialIndex;
 
   @override
   State<RideOptionsScreen> createState() => _RideOptionsScreenState();
@@ -39,59 +40,54 @@ class RideOptionsScreen extends StatefulWidget {
 
 class _RideOptionsScreenState extends State<RideOptionsScreen>
     with SingleTickerProviderStateMixin {
-  // FIXED: Rickshaw, Every (car/van), Bike
   final List<_Option> _options = const [
-    _Option(
-      code: 'rickshaw',
-      label: 'Rickshaw',
-      asset: 'assets/images/rikshaw.JPEG',
-      base: 132,
-      etaMin: 2,
-    ),
-    _Option(
-      code: 'every',
-      label: 'Every',
-      asset: 'assets/images/copy.png',
-      base: 231,
-      etaMin: 1,
-    ),
-    _Option(
-      code: 'bike',
-      label: 'Bike',
-      asset: 'assets/images/copy1.png',
-      base: 88,
-      etaMin: 3,
-    ),
+    _Option(code: 'rickshaw', label: 'Rickshaw', asset: 'assets/images/rikshaws.png', base: 132, etaMin: 2),
+    _Option(code: 'every',    label: 'Every',    asset: 'assets/images/copy.png',      base: 231, etaMin: 1),
+    _Option(code: 'bike',     label: 'Bike',     asset: 'assets/images/gari.png', base: 88,  etaMin: 3),
   ];
 
-  int _selectedIdx = 0;
+  late int _selectedIdx;
 
-  // top preview scale animation
+  // preview scale polish
   late final AnimationController _carCtrl =
       AnimationController(vsync: this, duration: const Duration(milliseconds: 220));
   late final Animation<double> _carScale =
-      Tween(begin: 0.95, end: 1.12).animate(
-        CurvedAnimation(parent: _carCtrl, curve: Curves.easeOut),
-      );
+      Tween(begin: 0.95, end: 1.10).animate(CurvedAnimation(parent: _carCtrl, curve: Curves.easeOut));
+
+  // ---- sizes you asked to change ----
+  static const double _kTopHeight = 260;   // overall preview box height
+  static const double _kHaloOuter = 220;   // outer circle
+  static const double _kHaloInner = 170;   // inner circle
+  static const double _kTopImage  = 170;   // BIG image size
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedIdx = widget.initialIndex ?? 1; // default Every
+  }
 
   void _onSelect(int idx) {
-    if (_selectedIdx != idx) {
-      HapticFeedback.selectionClick();
-      _carCtrl.forward(from: 0);
-      setState(() => _selectedIdx = idx);
-    }
+    if (_selectedIdx == idx) return;
+    HapticFeedback.selectionClick();
+    _carCtrl.forward(from: 0);
+
+    // keep Hero effect from previous message (optional)
+    Navigator.of(context).pushReplacement(PageRouteBuilder(
+      transitionDuration: const Duration(milliseconds: 380),
+      reverseTransitionDuration: const Duration(milliseconds: 260),
+      pageBuilder: (_, __, ___) => RideOptionsScreen(initialIndex: idx),
+      transitionsBuilder: (_, anim, __, child) =>
+          FadeTransition(opacity: CurvedAnimation(parent: anim, curve: Curves.easeOut), child: child),
+    ));
   }
 
   void _onConfirm() {
     final sel = _options[_selectedIdx];
-    final rideType = sel.toRideType(); // convert to your RideType model
-
-    // Use your existing RideState methods (no setRideTypeCode)
+    final rideType = sel.toRideType();
     context.read<RideState>()
       ..setRideType(rideType)
       ..setEta(sel.etaMin)
-      ..setPrice(sel.base + 120); // sample calc; adjust as needed
-
+      ..setPrice(sel.base + 120);
     Navigator.pushNamed(context, Routes.confirmPickup);
   }
 
@@ -106,9 +102,7 @@ class _RideOptionsScreenState extends State<RideOptionsScreen>
     final ride = context.watch<RideState>();
     final pickup = ride.pickup?.name ?? 'Near your location';
     final dst = ride.destination?.name ?? 'Select destination';
-
     final selected = _options[_selectedIdx];
-
     const pageBg = Color(0xFFF4FAFD);
 
     return Scaffold(
@@ -122,42 +116,35 @@ class _RideOptionsScreenState extends State<RideOptionsScreen>
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 10, 16, 16),
         children: [
-          // Top route summary (no "Change" button)
           _RouteCard(pickup: pickup, destination: dst),
           const SizedBox(height: 18),
 
-          // ======= Big vehicle + ETA chip =======
+          // ======= TOP PREVIEW — smaller halo, bigger image =======
           SizedBox(
-            height: 230,
+            height: _kTopHeight,
             child: Stack(
               alignment: Alignment.center,
               children: [
                 Container(
-                  width: 220,
-                  height: 220,
-                  decoration: const BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Color(0xFFE7F2FB),
-                  ),
+                  width: _kHaloOuter,
+                  height: _kHaloOuter,
+                  decoration: const BoxDecoration(shape: BoxShape.circle, color: Color(0xFFE7F2FB)),
                 ),
                 Container(
-                  width: 150,
-                  height: 150,
-                  decoration: const BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Color(0xFFEDF6FF),
-                  ),
+                  width: _kHaloInner,
+                  height: _kHaloInner,
+                  decoration: const BoxDecoration(shape: BoxShape.circle, color: Color(0xFFEDF6FF)),
                 ),
                 Positioned(
-                  left: 24,
-                  top: 28,
+                  left: 20,
+                  top: 8,
                   child: _EtaChip(text: '${selected.etaMin} min'),
                 ),
-                ScaleTransition(
-                  scale: _carScale,
-                  child: _VehicleImage(
-                    assetPath: selected.asset,
-                    size: 100,
+                Hero(
+                  tag: 'veh-${selected.code}',
+                  child: ScaleTransition(
+                    scale: _carScale,
+                    child: _VehicleImage(assetPath: selected.asset, size: _kTopImage),
                   ),
                 ),
               ],
@@ -165,9 +152,9 @@ class _RideOptionsScreenState extends State<RideOptionsScreen>
           ),
           const SizedBox(height: 8),
 
-          // ======= Three cards with ONLY images =======
+          // ======= 3 cards: image + price number =======
           SizedBox(
-            height: 130,
+            height: 146,
             child: ListView.separated(
               scrollDirection: Axis.horizontal,
               padding: const EdgeInsets.symmetric(horizontal: 4),
@@ -176,6 +163,12 @@ class _RideOptionsScreenState extends State<RideOptionsScreen>
               itemBuilder: (_, i) {
                 final isSelected = _selectedIdx == i;
                 final opt = _options[i];
+
+                final img = Hero(
+                  tag: 'veh-${opt.code}',
+                  child: _VehicleImage(assetPath: opt.asset, size: 56),
+                );
+
                 return InkWell(
                   borderRadius: BorderRadius.circular(18),
                   onTap: () => _onSelect(i),
@@ -187,9 +180,7 @@ class _RideOptionsScreenState extends State<RideOptionsScreen>
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(18),
                       border: Border.all(
-                        color: isSelected
-                            ? const Color(0xFF2B6BEA)
-                            : const Color(0xFFE7EEF5),
+                        color: isSelected ? const Color(0xFF2B6BEA) : const Color(0xFFE7EEF5),
                         width: isSelected ? 2 : 1,
                       ),
                       boxShadow: [
@@ -200,8 +191,21 @@ class _RideOptionsScreenState extends State<RideOptionsScreen>
                         ),
                       ],
                     ),
-                    // Only the image (no labels, no PKR)
-                    child: Center(child: _VehicleImage(assetPath: opt.asset, size: 60)),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        if (isSelected) HeroMode(enabled: false, child: img) else img,
+                        const SizedBox(height: 10),
+                        Text(
+                          '${opt.base}',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w800,
+                            color: Colors.grey.shade700,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 );
               },
@@ -209,10 +213,8 @@ class _RideOptionsScreenState extends State<RideOptionsScreen>
           ),
 
           const SizedBox(height: 18),
-
-          // ======= Green price bar + confirm =======
           _ConfirmCard(
-            priceText: 'Rs. ${selected.base + 120}', // show final total
+            priceText: 'Rs. ${selected.base + 120}',
             enabled: true,
             onPressed: _onConfirm,
           ),
@@ -222,17 +224,12 @@ class _RideOptionsScreenState extends State<RideOptionsScreen>
   }
 }
 
-/* =================== UI PIECES =================== */
+/* =================== UI PIECES (unchanged) =================== */
 
 class _RouteCard extends StatelessWidget {
-  const _RouteCard({
-    required this.pickup,
-    required this.destination,
-  });
-
+  const _RouteCard({required this.pickup, required this.destination});
   final String pickup;
   final String destination;
-
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -240,33 +237,22 @@ class _RouteCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.06),
-            blurRadius: 12,
-            offset: const Offset(0, 6),
-          ),
-        ],
+        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 12, offset: const Offset(0, 6))],
       ),
       child: Row(
         children: [
-          Column(
-            children: [
-              _Dot(color: const Color(0xFF21C06B), outlined: true),
-              Container(width: 2, height: 16, color: const Color(0xFFE6EEF4)),
-              _Dot(color: const Color(0xFF6D74FF)),
-            ],
-          ),
+          Column(children: [
+            _Dot(color: const Color(0xFF21C06B), outlined: true),
+            Container(width: 2, height: 16, color: const Color(0xFFE6EEF4)),
+            _Dot(color: const Color(0xFF6D74FF)),
+          ]),
           const SizedBox(width: 12),
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _Line(text: pickup),
-                const SizedBox(height: 6),
-                _Line(text: destination),
-              ],
-            ),
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              _Line(text: pickup),
+              const SizedBox(height: 6),
+              _Line(text: destination),
+            ]),
           ),
         ],
       ),
@@ -281,8 +267,7 @@ class _Dot extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 16,
-      height: 16,
+      width: 16, height: 16,
       decoration: BoxDecoration(
         color: color,
         shape: BoxShape.circle,
@@ -297,19 +282,14 @@ class _Line extends StatelessWidget {
   final String text;
   @override
   Widget build(BuildContext context) {
-    return Text(
-      text,
-      maxLines: 1,
-      overflow: TextOverflow.ellipsis,
-      style: const TextStyle(fontSize: 16.5, fontWeight: FontWeight.w600),
-    );
+    return Text(text, maxLines: 1, overflow: TextOverflow.ellipsis,
+        style: const TextStyle(fontSize: 16.5, fontWeight: FontWeight.w600));
   }
 }
 
 class _EtaChip extends StatelessWidget {
   const _EtaChip({required this.text});
   final String text;
-
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -318,53 +298,35 @@ class _EtaChip extends StatelessWidget {
         color: Colors.white,
         border: Border.all(color: const Color(0xFF2B6BEA), width: 1.3),
         borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 4))],
       ),
-      child: Row(
-        children: [
-          const Icon(Icons.timer_outlined, size: 16),
-          const SizedBox(width: 6),
-          Text(text, style: const TextStyle(fontWeight: FontWeight.w700)),
-        ],
-      ),
+      child: Row(children: [
+        const Icon(Icons.timer_outlined, size: 16),
+        const SizedBox(width: 6),
+        Text(text, style: const TextStyle(fontWeight: FontWeight.w700)),
+      ]),
     );
   }
 }
 
 class _VehicleImage extends StatelessWidget {
-  const _VehicleImage({required this.assetPath, this.size = 80});
+  const _VehicleImage({required this.assetPath, this.size = 60});
   final String assetPath;
   final double size;
-
   @override
   Widget build(BuildContext context) {
     return Image.asset(
-      assetPath,
-      width: size,
-      height: size,
-      fit: BoxFit.contain,
+      assetPath, width: size, height: size, fit: BoxFit.contain,
       errorBuilder: (_, __, ___) => const Icon(Icons.image_not_supported_outlined),
     );
   }
 }
 
 class _ConfirmCard extends StatelessWidget {
-  const _ConfirmCard({
-    required this.priceText,
-    required this.enabled,
-    required this.onPressed,
-  });
-
+  const _ConfirmCard({required this.priceText, required this.enabled, required this.onPressed});
   final String priceText;
   final bool enabled;
   final VoidCallback onPressed;
-
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -372,13 +334,7 @@ class _ConfirmCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(22),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.06),
-            blurRadius: 14,
-            offset: const Offset(0, 8),
-          ),
-        ],
+        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 14, offset: const Offset(0, 8))],
       ),
       child: Row(
         children: [
@@ -387,24 +343,13 @@ class _ConfirmCard extends StatelessWidget {
               height: 56,
               alignment: Alignment.centerLeft,
               padding: const EdgeInsets.symmetric(horizontal: 18),
-              decoration: BoxDecoration(
-                color: const Color(0xFF20C06C),
-                borderRadius: BorderRadius.circular(28),
-              ),
-              child: Text(
-                priceText,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 22,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
+              decoration: BoxDecoration(color: const Color(0xFF20C06C), borderRadius: BorderRadius.circular(28)),
+              child: Text(priceText, style: const TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.w800)),
             ),
           ),
           const SizedBox(width: 12),
           SizedBox(
-            width: 64,
-            height: 56,
+            width: 64, height: 56,
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(
                 elevation: 0,
