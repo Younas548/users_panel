@@ -129,17 +129,13 @@ class HomeScreen extends StatelessWidget {
                                 overflow: TextOverflow.ellipsis,
                                 style: theme.textTheme.bodyMedium,
                               ),
-                              const SizedBox(height: 8),
-                              SizedBox(
-                                height: 40,
-                                child: ElevatedButton(
-                                  onPressed: () => Navigator.pushNamed(context, Routes.rideOptions),
-                                  child: const Text(
-                                    'See options',
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ),
+                              const SizedBox(height: 10),
+
+                              // >>> UPDATED CTA (matches the red-circled style)
+                              _PrimaryCTA(
+                                label: 'Pick Your Ride',
+                                icon: Icons.local_taxi_rounded,
+                                onTap: () => Navigator.pushNamed(context, Routes.rideOptions),
                               ),
                             ],
                           ),
@@ -362,6 +358,100 @@ class _GlassPanel extends StatelessWidget {
             ],
           ),
           child: child,
+        ),
+      ),
+    );
+  }
+}
+
+/// BIG rounded pill CTA used for “See options”
+class _PrimaryCTA extends StatefulWidget {
+  final String label;
+  final IconData icon;
+  final VoidCallback onTap;
+
+  const _PrimaryCTA({
+    required this.label,
+    required this.icon,
+    required this.onTap,
+  });
+
+  @override
+  State<_PrimaryCTA> createState() => _PrimaryCTAState();
+}
+
+class _PrimaryCTAState extends State<_PrimaryCTA> {
+  bool _pressed = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final base = scheme.primary;
+
+    return GestureDetector(
+      onTapDown: (_) => setState(() => _pressed = true),
+      onTapCancel: () => setState(() => _pressed = false),
+      onTapUp: (_) => setState(() => _pressed = false),
+      onTap: widget.onTap,
+      child: AnimatedScale(
+        duration: const Duration(milliseconds: 90),
+        scale: _pressed ? 0.98 : 1.0,
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            // subtle green gradient like the circled button
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                base,
+                base.withOpacity(0.92),
+              ],
+            ),
+            borderRadius: BorderRadius.circular(28),
+            boxShadow: [
+              BoxShadow(
+                color: base.withOpacity(0.35),
+                blurRadius: 16,
+                offset: const Offset(0, 6),
+              ),
+            ],
+          ),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(minHeight: 52),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 28,
+                    height: 28,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.18),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(Icons.directions_car_filled, size: 16, color: Colors.white),
+                  ),
+                  const SizedBox(width: 10),
+                  Flexible(
+                    child: Text(
+                      widget.label,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w800,
+                        fontSize: 16,
+                        letterSpacing: 0.2,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  const Icon(Icons.chevron_right, color: Colors.white),
+                ],
+              ),
+            ),
+          ),
         ),
       ),
     );

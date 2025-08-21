@@ -1,35 +1,40 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'tokens.dart';
 
 ThemeData buildDarkTheme(Color seed) {
-  final base = ThemeData.dark(useMaterial3: true);
   final scheme = ColorScheme.fromSeed(
     seedColor: seed,
     brightness: Brightness.dark,
+    primary: ZColors.emerald,
+    secondary: ZColors.sky,
+    background: ZColors.bgDark,
+    surface: ZColors.cardDark,
   );
 
-  return base.copyWith(
+  return ThemeData(
+    useMaterial3: true,
     colorScheme: scheme,
-    textTheme: GoogleFonts.interTextTheme(base.textTheme),
+    scaffoldBackgroundColor: ZColors.bgDark,
+    textTheme: buildTextTheme(dark: true),
 
-    // Dark background
-    scaffoldBackgroundColor: const Color(0xFF101114),
-
-    // AppBar
     appBarTheme: const AppBarTheme(
+      backgroundColor: Colors.transparent,
       elevation: 0,
-      centerTitle: false,
+      foregroundColor: ZColors.textOnDark,
     ),
 
-    // Inputs
-    inputDecorationTheme: InputDecorationTheme(
-      border: const OutlineInputBorder(
-        borderRadius: BorderRadius.all(Radius.circular(12)),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: const BorderRadius.all(Radius.circular(12)),
-        borderSide: BorderSide(color: scheme.primary, width: 2),
-      ),
+    elevatedButtonTheme: zElevatedButtonTheme(ZColors.emerald, Colors.white),
+    inputDecorationTheme: zInputDecorationTheme(dark: true),
+
+    cardTheme: CardThemeData(
+      color: ZColors.cardDark,
+      margin: EdgeInsets.zero,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      shadowColor: Colors.black.withOpacity(.25),
+      elevation: 0,
     ),
+
+    dividerColor: ZColors.strokeDark,
+    iconTheme: const IconThemeData(color: ZColors.textOnDark),
   );
 }

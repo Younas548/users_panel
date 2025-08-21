@@ -12,24 +12,70 @@ class SettingsScreen extends StatefulWidget {
 class _SettingsScreenState extends State<SettingsScreen> {
   bool push = true;
 
+  // Quiet hours state
+  bool quietEnabled = true;
+  TimeOfDay quietFrom = const TimeOfDay(hour: 22, minute: 0); // 10:00 PM
+  TimeOfDay quietTo   = const TimeOfDay(hour: 7,  minute: 0); // 07:00 AM
+
   void _toggleDark(BuildContext context, bool value) {
     context.read<AppState>().setThemeMode(value ? ThemeMode.dark : ThemeMode.light);
     HapticFeedback.selectionClick();
   }
 
-  void _openColorPicker(BuildContext context) {
-    final app = context.read<AppState>();
-    final options = <Color>[
-      const Color(0xFF2563EB), // Ocean Blue (default)
-      const Color(0xFF22C55E), // Green
-      const Color(0xFFF59E0B), // Amber
-      const Color(0xFFE11D48), // Rose
-      const Color(0xFF8B5CF6), // Purple
-      const Color(0xFF06B6D4), // Cyan
-      const Color(0xFFDC2626), // Red
-      const Color(0xFF0891B2), // Teal-ish
-    ];
+  // Pick a time and update
+  Future<void> _pickQuietTime({
+    required bool isStart,
+  }) async {
+    final theme = Theme.of(context);
+    final initial = isStart ? quietFrom : quietTo;
 
+    final picked = await showTimePicker(
+      context: context,
+      initialTime: initial,
+      builder: (ctx, child) {
+        // Theme-aware dialog (optional polish)
+        return Theme(
+          data: theme.copyWith(
+            timePickerTheme: TimePickerThemeData(
+              backgroundColor: theme.colorScheme.surface,
+              hourMinuteTextColor: theme.colorScheme.onSurface,
+              dialHandColor: theme.colorScheme.primary,
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+    if (picked != null) {
+      setState(() {
+        if (isStart) {
+          quietFrom = picked;
+        } else {
+          quietTo = picked;
+        }
+      });
+    }
+  }
+
+  String _fmt(TimeOfDay t) {
+    final localizations = MaterialLocalizations.of(context);
+    return localizations.formatTimeOfDay(t, alwaysUse24HourFormat: false);
+  }
+
+  String zColors(Color c) {
+    if (c.value == const Color(0xFF2563EB).value) return 'Ocean Blue';
+    if (c.value == const Color(0xFF22C55E).value) return 'Green';
+    if (c.value == const Color(0xFFF59E0B).value) return 'Amber';
+    if (c.value == const Color(0xFFE11D48).value) return 'Rose';
+    if (c.value == const Color(0xFF8B5CF6).value) return 'Purple';
+    if (c.value == const Color(0xFF06B6D4).value) return 'Cyan';
+    if (c.value == const Color(0xFFDC2626).value) return 'Red';
+    if (c.value == const Color(0xFF0891B2).value) return 'Teal';
+    return '#${c.value.toRadixString(16).padLeft(8, '0').toUpperCase()}';
+  }
+
+  void _showTerms() {
+    final theme = Theme.of(context);
     showModalBottomSheet(
       context: context,
       showDragHandle: true,
@@ -40,31 +86,23 @@ class _SettingsScreenState extends State<SettingsScreen> {
       builder: (_) {
         return Padding(
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Align(
-                alignment: Alignment.centerLeft,
-                child: Text('Choose app color', style: Theme.of(context).textTheme.titleMedium),
-              ),
-              const SizedBox(height: 12),
-              Wrap(
-                spacing: 12,
-                runSpacing: 12,
-                children: [
-                  for (final c in options)
-                    _ColorDot(
-                      color: c,
-                      selected: app.primarySeed.value == c.value,
-                      onTap: () {
-                        app.setPrimarySeed(c);
-                        HapticFeedback.selectionClick();
-                        Navigator.pop(context);
-                      },
-                    ),
-                ],
-              ),
-            ],
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Terms of Service', style: theme.textTheme.titleLarge),
+                const SizedBox(height: 12),
+                Text(
+                  "These Terms govern your use of Zoomigoo. By using the app, you agree to these Terms. "
+                  "You are responsible for the accuracy of your information and compliance with all applicable laws. "
+                  "Rides are provided by independent drivers. Zoomigoo is not liable for delays or service issues "
+                  "beyond its control. Please review our Privacy Policy for details on data usage.\n\n"
+                  "1) Use of Service • 2) Account & Security • 3) Payments & Refunds • "
+                  "4) Prohibited Conduct • 5) Limitation of Liability • 6) Dispute Resolution.",
+                  style: theme.textTheme.bodyMedium,
+                ),
+              ],
+            ),
           ),
         );
       },
@@ -74,12 +112,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     final app = context.watch<AppState>();
-    final cs = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
     final isDark = app.isDark;
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Settings'),
+        backgroundColor: cs.surface,            // visible surface
+        foregroundColor: cs.onSurface,          // clear contrast
+        elevation: 1,                           // subtle separation
+        surfaceTintColor: Colors.transparent,   // avoid extra tint on M3
         scrolledUnderElevation: 0,
       ),
       body: ListView(
@@ -92,7 +135,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           const SizedBox(height: 12),
 
-          // Appearance
+          // Appearance (color picker removed, only dark mode)
           _SectionCard(
             title: 'Appearance',
             icon: Icons.palette_rounded,
@@ -106,21 +149,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   subtitle: Text(isDark ? 'On' : 'Off'),
                   secondary: Icon(isDark ? Icons.dark_mode : Icons.light_mode),
                 ),
-                const Divider(height: 1),
-                ListTile(
-                  leading: const Icon(Icons.color_lens_outlined),
-                  title: const Text('App color'),
-                  subtitle: Text(_colorName(app.primarySeed)),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: () => _openColorPicker(context),
-                ),
               ],
             ),
           ),
 
           const SizedBox(height: 12),
 
-          // Notifications
+          // Notifications + Quiet Hours (now working)
           _SectionCard(
             title: 'Notifications',
             icon: Icons.notifications_active_rounded,
@@ -138,13 +173,38 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   secondary: const Icon(Icons.notifications_outlined),
                 ),
                 const Divider(height: 1),
-                ListTile(
-                  leading: const Icon(Icons.do_not_disturb_on_outlined),
+                SwitchListTile.adaptive(
+                  value: quietEnabled,
+                  onChanged: (v) {
+                    setState(() => quietEnabled = v);
+                    HapticFeedback.selectionClick();
+                  },
                   title: const Text('Quiet hours'),
-                  subtitle: const Text('No sounds 10:00 pm – 7:00 am'),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: () => _soon(context),
+                  subtitle: Text(
+                    quietEnabled
+                        ? 'No sounds ${_fmt(quietFrom)} – ${_fmt(quietTo)}'
+                        : 'Off',
+                  ),
+                  secondary: const Icon(Icons.do_not_disturb_on_outlined),
                 ),
+                if (quietEnabled) const Divider(height: 1),
+                if (quietEnabled)
+                  ListTile(
+                    leading: const Icon(Icons.schedule_outlined),
+                    title: const Text('Start time'),
+                    subtitle: Text(_fmt(quietFrom)),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () => _pickQuietTime(isStart: true),
+                  ),
+                if (quietEnabled) const Divider(height: 1),
+                if (quietEnabled)
+                  ListTile(
+                    leading: const Icon(Icons.alarm_on_outlined),
+                    title: const Text('End time'),
+                    subtitle: Text(_fmt(quietTo)),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () => _pickQuietTime(isStart: false),
+                  ),
               ],
             ),
           ),
@@ -163,73 +223,43 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   title: Text('Version'),
                   subtitle: Text('1.0.0 (demo)'),
                 ),
-                Divider(height: 1),
-                ListTile(
-                  leading: Icon(Icons.article_outlined),
-                  title: Text('Terms of Service'),
-                  subtitle: Text('Tap to view (demo)'),
-                  trailing: Icon(Icons.chevron_right),
-                ),
               ],
             ),
           ),
 
           const SizedBox(height: 24),
-        ],
-      ),
-    );
-  }
 
-  String _colorName(Color c) {
-    if (c.value == const Color(0xFF2563EB).value) return 'Ocean Blue';
-    if (c.value == const Color(0xFF22C55E).value) return 'Green';
-    if (c.value == const Color(0xFFF59E0B).value) return 'Amber';
-    if (c.value == const Color(0xFFE11D48).value) return 'Rose';
-    if (c.value == const Color(0xFF8B5CF6).value) return 'Purple';
-    if (c.value == const Color(0xFF06B6D4).value) return 'Cyan';
-    if (c.value == const Color(0xFFDC2626).value) return 'Red';
-    if (c.value == const Color(0xFF0891B2).value) return 'Teal';
-    return '#${c.value.toRadixString(16).padLeft(8, '0').toUpperCase()}';
-  }
-
-  void _soon(BuildContext context) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('This option will be available soon (demo)')),
-    );
-  }
-}
-
-class _ColorDot extends StatelessWidget {
-  final Color color;
-  final bool selected;
-  final VoidCallback onTap;
-  const _ColorDot({required this.color, required this.selected, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return InkResponse(
-      onTap: onTap,
-      radius: 28,
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          Container(
-            width: 42,
-            height: 42,
-            decoration: BoxDecoration(
-              color: color,
-              shape: BoxShape.circle,
-              boxShadow: [
-                BoxShadow(
-                  color: color.withOpacity(0.35),
-                  blurRadius: 12,
-                  spreadRadius: 1,
+          // Footer: Terms of Service at bottom
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: InkWell(
+              borderRadius: BorderRadius.circular(12),
+              onTap: _showTerms,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+                decoration: BoxDecoration(
+                  color: theme.cardColor,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: theme.dividerColor),
                 ),
-              ],
+                child: Row(
+                  children: [
+                    const Icon(Icons.article_outlined),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        'Terms of Service',
+                        style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
+                      ),
+                    ),
+                    const Icon(Icons.chevron_right),
+                  ],
+                ),
+              ),
             ),
           ),
-          if (selected)
-            const Icon(Icons.check, color: Colors.white, size: 22),
+
+          const SizedBox(height: 24),
         ],
       ),
     );
@@ -245,12 +275,14 @@ class _Header extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 18, 16, 18),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: isDark
-              ? [cs.surfaceVariant.withOpacity(0.16), cs.primary.withOpacity(0.18)]
+          colors: isDarkMode
+              ? [cs.surfaceVariant.withOpacity(0.16), cs.primary.withOpacity(0.20)]
               : [cs.primaryContainer.withOpacity(0.45), cs.primary.withOpacity(0.40)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -261,7 +293,7 @@ class _Header extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.12),
+              color: Colors.white.withOpacity(0.18),
               borderRadius: BorderRadius.circular(16),
             ),
             child: const Icon(Icons.tune_rounded, color: Colors.white, size: 26),
@@ -288,8 +320,8 @@ class _Header extends StatelessWidget {
               padding: WidgetStateProperty.all(const EdgeInsets.symmetric(horizontal: 8)),
               backgroundColor: WidgetStateProperty.resolveWith(
                 (states) => states.contains(WidgetState.selected)
-                    ? Colors.white.withOpacity(0.18)
-                    : Colors.white.withOpacity(0.10),
+                    ? Colors.white.withOpacity(0.22)
+                    : Colors.white.withOpacity(0.12),
               ),
               foregroundColor: WidgetStateProperty.all(Colors.white),
             ),
@@ -316,8 +348,9 @@ class _SectionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final surface = Theme.of(context).colorScheme.surface;
-    final onSurface = Theme.of(context).colorScheme.onSurface.withOpacity(0.8);
+    final theme = Theme.of(context);
+    final surface = theme.colorScheme.surface;
+    final onSurface = theme.colorScheme.onSurface.withOpacity(0.9);
 
     return Card(
       elevation: 1,
@@ -341,7 +374,7 @@ class _SectionCard extends StatelessWidget {
                 const SizedBox(width: 10),
                 Text(
                   title,
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  style: theme.textTheme.titleMedium?.copyWith(
                         color: onSurface,
                         fontWeight: FontWeight.w800,
                       ),
