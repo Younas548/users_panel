@@ -75,7 +75,7 @@ class Routes {
     completePayment: (_) => const CompletePaymentScreen(),
 
     // phase-2
-    history:  (_) => const HistoryScreen(),
+    history:  (_) => const RideHistoryScreen(),
     profile:  (_) => const ProfileScreen(),
     settings: (_) => const SettingsScreen(),
     support:  (_) => const SupportScreen(),

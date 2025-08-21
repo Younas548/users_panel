@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+// TODO: apne project ke hisaab se sahi path lagayein:
+import '../../screens/features/support_chat_screen.dart'; // e.g. 'features/support/screens/support_chat_screen.dart'
+
 class SupportScreen extends StatefulWidget {
   const SupportScreen({super.key});
 
@@ -28,8 +31,8 @@ class _SupportScreenState extends State<SupportScreen> {
       builder: (_) => _IssueSheet(
         title: title,
         onSubmitted: () {
-            Navigator.pop(context);
-            _snack('Ticket submitted — we’ll get back soon');
+          Navigator.pop(context);
+          _snack('Ticket submitted — we’ll get back soon');
         },
       ),
     );
@@ -40,7 +43,7 @@ class _SupportScreenState extends State<SupportScreen> {
     HapticFeedback.selectionClick();
     final uri = Uri(
       scheme: 'mailto',
-      path: 'support@zoomigoo.',
+      path: 'aliyounas343250@gmail.com',
       queryParameters: {
         'subject': 'Zoomigoo Support',
         'body': 'Hi team,\n\nI need help with…'
@@ -111,6 +114,7 @@ class _SupportScreenState extends State<SupportScreen> {
                         ),
                   ),
                 ),
+                // >>> UPDATED: open chat screen (no demo)
                 FilledButton.tonalIcon(
                   icon: const Icon(Icons.chat_bubble_outline),
                   label: const Text('Chat'),
@@ -118,8 +122,12 @@ class _SupportScreenState extends State<SupportScreen> {
                     foregroundColor: Colors.white,
                     backgroundColor: Colors.white.withOpacity(0.18),
                   ),
-                  onPressed: () =>
-                      _snack('Live chat coming soon'),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const SupportChatScreen()),
+                    );
+                  },
                 ),
               ],
             ),
@@ -236,7 +244,7 @@ class _SupportScreenState extends State<SupportScreen> {
                     child: Icon(Icons.email_outlined, color: cs.secondary),
                   ),
                   title: const Text('Email support'),
-                  subtitle: const Text('support@zoomigoo.com'),
+                  subtitle: const Text('aliyounas343250@gmail.com'),
                   trailing: const Icon(Icons.arrow_outward_rounded),
                   onTap: _openEmail,
                 ),
