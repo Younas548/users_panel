@@ -20,8 +20,8 @@ class InRideScreen extends StatelessWidget {
     final theme = Theme.of(context);
 
     final destination = ride.destination?.name ?? 'Destination';
-    const etaText = '~10 min'; // demo
-    const driverPhone = '+92 300 1234567'; // TODO: RideState se real number pass karein
+    const etaText = '~10 min';
+    const driverPhone = '+92 333 0480202'; // TODO: RideState se real number pass karein
 
     return Scaffold(
       extendBodyBehindAppBar: true,

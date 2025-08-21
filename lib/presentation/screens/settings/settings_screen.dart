@@ -221,7 +221,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ListTile(
                   leading: Icon(Icons.badge_outlined),
                   title: Text('Version'),
-                  subtitle: Text('1.0.0 (demo)'),
+                  subtitle: Text('1.0.0'),
                 ),
               ],
             ),

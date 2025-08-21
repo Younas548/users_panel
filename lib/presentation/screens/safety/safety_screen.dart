@@ -24,18 +24,18 @@ class _SafetyScreenState extends State<SafetyScreen> {
 
     if (ok == true && context.mounted) {
       HapticFeedback.mediumImpact();
-      _showSnack(context, 'SOS triggered (demo)');
+      _showSnack(context, 'SOS triggered');
       if (autoShareOnSOS) {
         await Future.delayed(const Duration(milliseconds: 400));
         if (context.mounted) {
-          _showSnack(context, 'Trip link auto-shared to trusted contacts (demo)');
+          _showSnack(context, 'Trip link auto-shared to trusted contacts');
         }
       }
     }
   }
 
   void _openShareSheet(BuildContext context) {
-    const link = 'https://zoomigoo.demo/trip/XYZ123';
+    const link = 'https://zoomigoo.com/trip/XYZ123';
     HapticFeedback.selectionClick();
     showModalBottomSheet(
       context: context,
@@ -126,7 +126,7 @@ class _SafetyScreenState extends State<SafetyScreen> {
               width: double.infinity,
               child: FilledButton.tonalIcon(
                 icon: const Icon(Icons.share),
-                label: const Text('Share (demo)'),
+                label: const Text('Share'),
                 onPressed: () {
                   Navigator.pop(context);
                   HapticFeedback.lightImpact();
@@ -153,7 +153,7 @@ class _SafetyScreenState extends State<SafetyScreen> {
           Text('Quick access to safety tools', style: Theme.of(context).textTheme.titleMedium),
           const SizedBox(height: 6),
           Text(
-            'Use SOS in emergencies and share your trip link with trusted contacts. (Demo only)',
+            'Use SOS in emergencies and share your trip link with trusted contacts.',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.8),
                 ),
@@ -175,7 +175,7 @@ class _SafetyScreenState extends State<SafetyScreen> {
                 ),
                 title: const Text('Emergency SOS'),
                 subtitle: Text(
-                  autoShareOnSOS ? 'Tap to confirm — auto-share ON (demo)' : 'Tap to confirm (demo)',
+                  autoShareOnSOS ? 'Tap to confirm — auto-share ON ' : 'Tap to confirm',
                 ),
                 trailing: FilledButton(
                   style: FilledButton.styleFrom(
@@ -196,7 +196,7 @@ class _SafetyScreenState extends State<SafetyScreen> {
           SwitchListTile(
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             title: const Text('Auto-share trip on SOS'),
-            subtitle: const Text('Send your live link to trusted contacts automatically (demo)'),
+            subtitle: const Text('Send your live link to trusted contacts automatically'),
             value: autoShareOnSOS,
             onChanged: (v) => setState(() => autoShareOnSOS = v),
             secondary: Icon(Icons.auto_awesome_rounded, color: cs.primary),
@@ -216,7 +216,7 @@ class _SafetyScreenState extends State<SafetyScreen> {
                 child: Icon(Icons.share, color: cs.primary),
               ),
               title: const Text('Share trip status'),
-              subtitle: const Text('Send your trip link to a contact (demo)'),
+              subtitle: const Text('Send your trip link to a contact'),
               trailing: OutlinedButton(
                 onPressed: () => _openShareSheet(context),
                 child: const Text('Share'),
@@ -363,7 +363,7 @@ class _ResponsiveSOSDialog extends StatelessWidget {
                           SizedBox(width: 6),
                           Expanded(
                             child: Text(
-                              'SOS sends immediately after confirm (demo)',
+                              'SOS sends immediately after confirm',
                               style: TextStyle(color: Colors.white70),
                             ),
                           ),
@@ -418,7 +418,7 @@ class _ResponsiveSOSDialog extends StatelessWidget {
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    'This is a demo. No real emergency services will be contacted.\n\n'
+                    'This is demo. No real emergency services will be contacted.\n\n'
                     '${autoShareOnSOS ? 'Auto-share is ON: your trusted contacts will be notified.' : 'You can enable Auto-share to notify trusted contacts.'}',
                     style: Theme.of(context).textTheme.bodyMedium,
                   ),

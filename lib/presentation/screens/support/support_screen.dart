@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class SupportScreen extends StatefulWidget {
   const SupportScreen({super.key});
@@ -13,62 +14,55 @@ class _SupportScreenState extends State<SupportScreen> {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
   }
 
+  // ---------- ISSUE BOTTOM SHEET (Keyboard-safe) ----------
   void _openIssueSheet(String title) {
     HapticFeedback.selectionClick();
-    final ctl = TextEditingController();
     showModalBottomSheet(
       context: context,
-      useSafeArea: true,
       isScrollControlled: true,
+      useSafeArea: true,
       showDragHandle: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
-      builder: (_) => Padding(
-        padding: EdgeInsets.only(
-          left: 16, right: 16, top: 8,
-          bottom: MediaQuery.of(context).viewInsets.bottom + 16,
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Text(title, style: Theme.of(context).textTheme.titleLarge),
-            ),
-            const SizedBox(height: 10),
-            TextFormField(
-              controller: ctl,
-              maxLines: 4,
-              textInputAction: TextInputAction.newline,
-              decoration: const InputDecoration(
-                hintText: 'Describe what happened…',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(12)),
-                ),
-              ),
-            ),
-            const SizedBox(height: 12),
-            SizedBox(
-              width: double.infinity,
-              child: FilledButton.icon(
-                icon: const Icon(Icons.send),
-                label: const Text('Submit (demo)'),
-                onPressed: () {
-                  Navigator.pop(context);
-                  _snack('Ticket submitted — we’ll get back soon (demo)');
-                },
-              ),
-            ),
-          ],
-        ),
+      builder: (_) => _IssueSheet(
+        title: title,
+        onSubmitted: () {
+            Navigator.pop(context);
+            _snack('Ticket submitted — we’ll get back soon');
+        },
       ),
     );
   }
 
-  void _contact(String how) {
+  // ---------- CONTACT OPENERS (visible actions) ----------
+  Future<void> _openEmail() async {
     HapticFeedback.selectionClick();
-    _snack('$how opened (demo)');
+    final uri = Uri(
+      scheme: 'mailto',
+      path: 'support@zoomigoo.',
+      queryParameters: {
+        'subject': 'Zoomigoo Support',
+        'body': 'Hi team,\n\nI need help with…'
+      },
+    );
+    _snack('Opening email…');
+    await launchUrl(uri, mode: LaunchMode.externalApplication);
+  }
+
+  Future<void> _openCall() async {
+    HapticFeedback.selectionClick();
+    final uri = Uri(scheme: 'tel', path: '+923330480202');
+    _snack('Dialing…');
+    await launchUrl(uri, mode: LaunchMode.externalApplication);
+  }
+
+  Future<void> _openWhatsApp() async {
+    HapticFeedback.selectionClick();
+    final uri = Uri.parse(
+        'https://wa.me/923001234567?text=Hi%20Zoomigoo%20Support%2C%20I%20need%20help%20with…');
+    _snack('Opening WhatsApp…');
+    await launchUrl(uri, mode: LaunchMode.externalApplication);
   }
 
   @override
@@ -104,7 +98,8 @@ class _SupportScreenState extends State<SupportScreen> {
                     color: Colors.white.withOpacity(0.14),
                     borderRadius: BorderRadius.circular(16),
                   ),
-                  child: const Icon(Icons.support_agent_rounded, color: Colors.white, size: 26),
+                  child: const Icon(Icons.support_agent_rounded,
+                      color: Colors.white, size: 26),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -123,7 +118,8 @@ class _SupportScreenState extends State<SupportScreen> {
                     foregroundColor: Colors.white,
                     backgroundColor: Colors.white.withOpacity(0.18),
                   ),
-                  onPressed: () => _snack('Live chat coming soon (demo)'),
+                  onPressed: () =>
+                      _snack('Live chat coming soon'),
                 ),
               ],
             ),
@@ -209,17 +205,17 @@ class _SupportScreenState extends State<SupportScreen> {
               children: const [
                 _FaqTile(
                   q: 'How do refunds work?',
-                  a: 'Refunds for valid claims are processed to your original payment method within 3–5 business days (demo).',
+                  a: 'Refunds for valid claims are processed to your original payment method within 3–5 business days.',
                 ),
                 Divider(height: 1),
                 _FaqTile(
                   q: 'How do I contact my driver?',
-                  a: 'From your trip details, tap “Contact driver” to call or message (demo).',
+                  a: 'From your trip details, tap “Contact driver” to call or message.',
                 ),
                 Divider(height: 1),
                 _FaqTile(
                   q: 'Why is my fare higher than expected?',
-                  a: 'Fares can change due to traffic, surge pricing, detours, or wait time (demo).',
+                  a: 'Fares can change due to traffic, surge pricing, detours, or wait time .',
                 ),
               ],
             ),
@@ -240,9 +236,9 @@ class _SupportScreenState extends State<SupportScreen> {
                     child: Icon(Icons.email_outlined, color: cs.secondary),
                   ),
                   title: const Text('Email support'),
-                  subtitle: const Text('support@zoomigoo.demo'),
+                  subtitle: const Text('support@zoomigoo.com'),
                   trailing: const Icon(Icons.arrow_outward_rounded),
-                  onTap: () => _contact('Email'),
+                  onTap: _openEmail,
                 ),
                 const Divider(height: 1),
                 ListTile(
@@ -251,21 +247,20 @@ class _SupportScreenState extends State<SupportScreen> {
                     child: Icon(Icons.call_outlined, color: cs.primary),
                   ),
                   title: const Text('Call center'),
-                  subtitle: const Text('+92 300 1234567'),
+                  subtitle: const Text('+92 333 0480202'),
                   trailing: const Icon(Icons.arrow_outward_rounded),
-                  onTap: () => _contact('Call'),
+                  onTap: _openCall,
                 ),
                 const Divider(height: 1),
                 ListTile(
                   leading: CircleAvatar(
                     backgroundColor: cs.tertiary.withOpacity(0.12),
                     child: Icon(Icons.chat_bubble_rounded, color: cs.tertiary),
-
                   ),
                   title: const Text('WhatsApp (fastest)'),
-                  subtitle: const Text('+92 300 1234567'),
+                  subtitle: const Text(' 333 0480202'),
                   trailing: const Icon(Icons.arrow_outward_rounded),
-                  onTap: () => _contact('WhatsApp'),
+                  onTap: _openWhatsApp,
                 ),
               ],
             ),
@@ -273,6 +268,90 @@ class _SupportScreenState extends State<SupportScreen> {
 
           const SizedBox(height: 24),
         ],
+      ),
+    );
+  }
+}
+
+// ——————————————————— Bottom Sheet Widget ———————————————————
+
+class _IssueSheet extends StatefulWidget {
+  final String title;
+  final VoidCallback onSubmitted;
+  const _IssueSheet({required this.title, required this.onSubmitted});
+
+  @override
+  State<_IssueSheet> createState() => _IssueSheetState();
+}
+
+class _IssueSheetState extends State<_IssueSheet> {
+  final _ctl = TextEditingController();
+  final _focus = FocusNode();
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _focus.requestFocus();
+    });
+  }
+
+  @override
+  void dispose() {
+    _focus.dispose();
+    _ctl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedPadding(
+      duration: const Duration(milliseconds: 180),
+      curve: Curves.easeOut,
+      padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+      child: FractionallySizedBox(
+        heightFactor: 0.7,
+        child: Material(
+          color: Theme.of(context).colorScheme.surface,
+          child: SafeArea(
+            top: false,
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(widget.title,
+                        style: Theme.of(context).textTheme.titleLarge),
+                  ),
+                  const SizedBox(height: 10),
+                  TextFormField(
+                    controller: _ctl,
+                    focusNode: _focus,
+                    maxLines: 6,
+                    textInputAction: TextInputAction.newline,
+                    decoration: const InputDecoration(
+                      hintText: 'Describe what happened…',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(12)),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    width: double.infinity,
+                    child: FilledButton.icon(
+                      icon: const Icon(Icons.send),
+                      label: const Text('Submit'),
+                      onPressed: widget.onSubmitted,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }
