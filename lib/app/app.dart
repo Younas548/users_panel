@@ -11,7 +11,7 @@ import '../presentation/state/ride_state.dart';
 import 'routes.dart';
 
 // (Optional) Fallback use in onGenerateRoute if Routes.map ever misses /wallet
-import '../presentation/screens/wallet/wallet_screen.dart';
+
 
 class ZoomigooApp extends StatelessWidget {
   const ZoomigooApp({super.key});
@@ -41,20 +41,20 @@ class ZoomigooApp extends StatelessWidget {
 
             // SAFETY NET: if a route (like /wallet) isn't found in Routes.map,
             // resolve it here so navigation never crashes.
-            onGenerateRoute: (settings) {
-              // Let app's custom generator handle first (if any)
-              final generated = Routes.onGenerateRoute(settings);
-              if (generated != null) return generated;
+            // onGenerateRoute: (settings) {
+            //   // Let app's custom generator handle first (if any)
+            //   final generated = Routes.onGenerateRoute(settings);
+            //   if (generated != null) return generated;
 
-              switch (settings.name) {
-                case Routes.wallet:
-                  return MaterialPageRoute(
-                    builder: (_) => const WalletScreen(),
-                    settings: settings,
-                  );
-              }
-              return null; // fall through to onUnknownRoute
-            },
+            //   switch (settings.name) {
+            //     case Routes.wallet:
+            //       return MaterialPageRoute(
+            //         builder: (_) => const WalletScreen(),
+            //         settings: settings,
+            //       );
+            //   }
+            //   return null; // fall through to onUnknownRoute
+            // },
 
             onUnknownRoute: Routes.onUnknownRoute,
             navigatorObservers: [Routes.logger],

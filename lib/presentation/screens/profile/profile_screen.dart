@@ -21,7 +21,7 @@ class _ProfileScreenState extends State<ProfileScreen>
   String _avatarUrl = '';
 
   // Only CASH is supported/visible
-  PaymentMethod _defaultPayment = PaymentMethod.cash;
+//  PaymentMethod _defaultPayment = PaymentMethod.cash;
 
   final List<SavedPlace> _places = [
     SavedPlace(label: 'Home', address: 'DHA Phase 6, Karachi'),
@@ -928,7 +928,7 @@ class _PlacesSheetState extends State<_PlacesSheet> {
 enum PaymentMethod { cash }
 
 extension on PaymentMethod {
-  String get label => 'Cash';
+  //String get label => 'Cash';
 }
 
 class SavedPlace {

@@ -23,10 +23,7 @@ import '../presentation/screens/settings/settings_screen.dart';
 import '../presentation/screens/support/support_screen.dart';
 import '../presentation/screens/safety/safety_screen.dart';
 
-// WALLET
-import '../presentation/screens/wallet/wallet_screen.dart';
-import '../presentation/screens/wallet/checkout_screen.dart';
-import '../presentation/screens/wallet/payment_receipt_screen.dart'; // <- make sure file exists
+// <- make sure file exists
 
 class Routes {
   // core
@@ -85,31 +82,31 @@ class Routes {
     safety:   (_) => const SafetyScreen(),
 
     // wallet (arg-less)
-    wallet: (_) => const WalletScreen(),
+   // wallet: (_) => const WalletScreen(),
     // ⚠️ DO NOT put checkout/paymentReceipt here (they need arguments via settings)
   };
 
   // ---- Argument-based routes yahan se banao ----
-  static Route<dynamic>? onGenerateRoute(RouteSettings settings) {
-    switch (settings.name) {
-      case checkout:
-        // CheckoutScreen args screen ke andar ModalRoute se liye ja rahe hain,
-        // is liye yahan sirf settings pass kar do.
-        return MaterialPageRoute(
-          builder: (_) => const CheckoutScreen(),
-          settings: settings,
-        );
+  // static Route<dynamic>? onGenerateRoute(RouteSettings settings) {
+  //   switch (settings.name) {
+  //     case checkout:
+  //       // CheckoutScreen args screen ke andar ModalRoute se liye ja rahe hain,
+  //       // is liye yahan sirf settings pass kar do.
+  //       return MaterialPageRoute(
+  //         builder: (_) => const CheckoutScreen(),
+  //         settings: settings,
+  //       );
 
-      case paymentReceipt:
-        // Agar aapki PaymentReceiptScreen constructor me args chahiye,
-        // screen ke andar ModalRoute.of(context)!.settings.arguments se le lo.
-        return MaterialPageRoute(
-          builder: (_) => const PaymentReceiptScreen(),
-          settings: settings,
-        );
-    }
-    return null; // let onUnknownRoute handle unknowns
-  }
+  //     case paymentReceipt:
+  //       // Agar aapki PaymentReceiptScreen constructor me args chahiye,
+  //       // screen ke andar ModalRoute.of(context)!.settings.arguments se le lo.
+  //       return MaterialPageRoute(
+  //         builder: (_) => const PaymentReceiptScreen(),
+  //         settings: settings,
+  //       );
+  //   }
+  //   return null; // let onUnknownRoute handle unknowns
+  // }
 
   static Route<dynamic> onUnknownRoute(RouteSettings settings) {
     debugPrint('⚠️ Unknown route: ${settings.name}');
