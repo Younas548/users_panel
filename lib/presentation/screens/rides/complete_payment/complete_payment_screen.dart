@@ -57,7 +57,7 @@ class CompletePaymentScreen extends StatelessWidget {
                           child: ElevatedButton(
                             style: ElevatedButton.styleFrom(
                               backgroundColor: const Color(0xFF22c55e),
-                              foregroundColor: Colors.white,
+                              foregroundColor: const Color.fromARGB(255, 56, 45, 45),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(16),
                               ),
@@ -103,11 +103,11 @@ class _SuccessCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: const Color.fromARGB(255, 217, 225, 235),
+        color: const Color.fromARGB(255, 93, 98, 104),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color.fromARGB(255, 225, 236, 255), width: 1),
+        border: Border.all(color: const Color.fromARGB(255, 91, 100, 116), width: 1),
         boxShadow: const [
-          BoxShadow(color: Color.fromARGB(223, 233, 228, 228), blurRadius: 24, offset: Offset(0, 16)),
+          BoxShadow(color: Color.fromARGB(223, 160, 155, 155), blurRadius: 24, offset: Offset(0, 16)),
         ],
       ),
       child: Column(
@@ -118,13 +118,13 @@ class _SuccessCard extends StatelessWidget {
               shape: BoxShape.circle,
               color: Color(0xFF10b981),
             ),
-            child: const Icon(Icons.check_rounded, size: 46, color: Colors.white),
+            child: const Icon(Icons.check_rounded, size: 46, color: Color.fromARGB(255, 218, 212, 212)),
           ),
           const SizedBox(height: 12),
           Text(
             'PKR ${price.toStringAsFixed(0)}',
             style: const TextStyle(
-              fontSize: 28, fontWeight: FontWeight.w700, color: Colors.white),
+              fontSize: 28, fontWeight: FontWeight.w700, color: Color.fromARGB(255, 223, 213, 213)),
           ),
           const SizedBox(height: 6),
           Container(
