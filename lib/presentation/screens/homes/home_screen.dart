@@ -8,8 +8,108 @@ import '../../../core/constants/flags.dart'; // <- AppFlags.enablePhase2
 import '../../state/ride_state.dart';
 import '../../widgets/map/map_stub.dart';
 
-class HomeScreen extends StatelessWidget {
+// ✅ Single source of truth (Geolocator-based service) + permission dialog
+import '../../../presentation/screens/permissions/location_permission_service.dart' as loc_perm;
+import '../../../presentation/screens/permissions/location_permission_dialog.dart';
+
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
+  // 🔒 Static guards: same app run me widget recreate ho to bhi dialog dubara na khule
+  static bool _askedThisRun = false;
+  static bool _grantedThisRun = false;
+  static bool _requestedAfterResume = false; // resume ke baad sirf 1 dafa
+
+  bool _dialogOpen = false; // prevent stacking
+  bool _requesting = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    // UI render ke baad permission check
+    WidgetsBinding.instance.addPostFrameCallback((_) => _maybeAskPermission());
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) _afterResumeCheck();
+  }
+
+  Future<void> _afterResumeCheck() async {
+    if (!mounted || _dialogOpen || _grantedThisRun || _requesting || _requestedAfterResume) return;
+
+    await Future.delayed(const Duration(milliseconds: 300)); // OS ko settle ka time
+    final s = await loc_perm.LocationPermissionService.check();
+    if (!mounted) return;
+
+    // GPS ON hai par app permission pending ho to sheet 1 dafa dikhao
+    if (s != loc_perm.LocPerm.granted && s != loc_perm.LocPerm.serviceDisabled) {
+      _requestedAfterResume = true;
+      _requesting = true;
+      final r = await loc_perm.LocationPermissionService.request();
+      _requesting = false;
+      if (r == loc_perm.LocPerm.granted) _grantedThisRun = true;
+    }
+  }
+
+  Future<void> _maybeAskPermission() async {
+    if (_dialogOpen || _grantedThisRun || _requesting) return;
+
+    // 1) Quick check
+    var s = await loc_perm.LocationPermissionService.check();
+    if (!mounted) return;
+    if (s == loc_perm.LocPerm.granted) { _grantedThisRun = true; return; }
+
+    // 2) Small debounce
+    await Future.delayed(const Duration(milliseconds: 250));
+    s = await loc_perm.LocationPermissionService.check();
+    if (!mounted) return;
+    if (s == loc_perm.LocPerm.granted) { _grantedThisRun = true; return; }
+
+    // 3) Same run me sirf 1 martaba
+    if (_askedThisRun) return;
+
+    _askedThisRun = true;
+    _dialogOpen = true;
+    try {
+      // Dialog sirf signal dega: askNow == true => ab request chalao
+      final askNow = await showLocationPermissionDialog(context) ?? false;
+
+      if (askNow) {
+        _requesting = true;
+        final res = await loc_perm.LocationPermissionService.request();
+        _requesting = false;
+
+        if (res == loc_perm.LocPerm.granted) {
+          _grantedThisRun = true;
+        } else if (res == loc_perm.LocPerm.permanentlyDenied) {
+          await loc_perm.LocationPermissionService.openAppSettings();
+        }
+      }
+    } finally {
+      _dialogOpen = false;
+    }
+
+    // 4) Gentle nudge
+    final again = await loc_perm.LocationPermissionService.check();
+    if (mounted && again != loc_perm.LocPerm.granted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Location is required for accurate pickup')),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -398,7 +498,6 @@ class _PrimaryCTAState extends State<_PrimaryCTA> {
         scale: _pressed ? 0.98 : 1.0,
         child: DecoratedBox(
           decoration: BoxDecoration(
-            // subtle green gradient like the circled button
             gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../app/routes.dart';
-// validators import hata diya kyun ke ab use nahi ho raha
 import '../../../state/ride_state.dart';
 import '../../../widgets/map/map_stub.dart';
 
@@ -29,6 +28,15 @@ class _ConfirmPickupScreenState extends State<ConfirmPickupScreen> {
 
     final destName = ride.destination?.name ?? '—';
     final destAddr = ride.destination?.address ?? 'No address selected';
+
+    // Fare (fallback agar user direct aajaye):
+    final subtotal = (ride.subtotal == 0 ? ride.estimatedPrice : ride.subtotal).toDouble();
+    final discount = ride.discount.toDouble();
+    final total    = (ride.total == 0 ? subtotal : ride.total).toDouble();
+
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final tt = theme.textTheme;
 
     return Scaffold(
       appBar: AppBar(title: const Text('Confirm pickup')),
@@ -57,9 +65,30 @@ class _ConfirmPickupScreenState extends State<ConfirmPickupScreen> {
             style: const TextStyle(fontWeight: FontWeight.w600),
           ),
 
-          const SizedBox(height: 12),
+          const SizedBox(height: 16),
 
-          // NOTE OPTIONAL: validator hata diya, label me (optional) add
+          // ===== Fare breakdown (Est.) =====
+          Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: theme.cardColor,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: cs.outlineVariant),
+            ),
+            child: Column(
+              children: [
+                _line(context, 'Subtotal', 'PKR ${subtotal.toStringAsFixed(0)}'),
+                if (discount > 0)
+                  _line(context, 'Promo (WELCOME20)', '- PKR ${discount.toStringAsFixed(0)}', muted: true),
+                const Divider(height: 18),
+                _lineBold(context, 'Total (Est.)', 'PKR ${total.toStringAsFixed(0)}'),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 16),
+
+          // NOTE OPTIONAL
           Form(
             key: _form,
             child: TextFormField(
@@ -70,13 +99,13 @@ class _ConfirmPickupScreenState extends State<ConfirmPickupScreen> {
                 labelText: 'Note to driver (optional)',
                 border: OutlineInputBorder(),
               ),
-              // <- koi validator nahi, is liye optional
+              // optional: no validator
             ),
           ),
         ],
       ),
 
-      // Bottom CTA: bina validate kiye next page
+      // Bottom CTA
       bottomNavigationBar: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(12),
@@ -86,13 +115,39 @@ class _ConfirmPickupScreenState extends State<ConfirmPickupScreen> {
               icon: const Icon(Icons.search),
               label: const Text('Find a driver'),
               onPressed: () {
-                // Agar future me note save karna ho to yahan se ride state me bhej dein (optional)
-                // context.read<RideState>().setNote(_note.text.trim());
+                // context.read<RideState>().setNote(_note.text.trim()); // if you add notes later
                 Navigator.pushNamed(context, Routes.findingDriver);
               },
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _line(BuildContext context, String l, String r, {bool muted = false}) {
+    final tt = Theme.of(context).textTheme;
+    final cs = Theme.of(context).colorScheme;
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        children: [
+          Expanded(child: Text(l, style: tt.bodyMedium?.copyWith(color: muted ? cs.onSurfaceVariant : null))),
+          Text(r, style: tt.bodyMedium?.copyWith(color: muted ? cs.onSurfaceVariant : null)),
+        ],
+      ),
+    );
+  }
+
+  Widget _lineBold(BuildContext context, String l, String r) {
+    final tt = Theme.of(context).textTheme;
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        children: [
+          Expanded(child: Text(l, style: tt.titleMedium?.copyWith(fontWeight: FontWeight.w700))),
+          Text(r, style: tt.titleMedium?.copyWith(fontWeight: FontWeight.w800)),
+        ],
       ),
     );
   }

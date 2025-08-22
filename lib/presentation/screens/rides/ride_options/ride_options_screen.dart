@@ -4,6 +4,8 @@ import 'package:provider/provider.dart';
 
 import '../../../../app/routes.dart';
 import '../../../../core/data/models/ride_type.dart';
+import '../../../../core/constants/flags.dart';
+import '../../../../core/utils/promo_preview.dart';
 import '../../../state/ride_state.dart';
 
 class _Option {
@@ -42,7 +44,7 @@ class _RideOptionsScreenState extends State<RideOptionsScreen>
   final List<_Option> _options = const [
     _Option(code: 'rickshaw', label: 'Rickshaw', asset: 'assets/images/rikshaws.png', base: 132, etaMin: 2),
     _Option(code: 'every',    label: 'Every',    asset: 'assets/images/copy.png',      base: 231, etaMin: 1),
-    _Option(code: 'bike',     label: 'Bike',     asset: 'assets/images/gari.png', base: 88,  etaMin: 3),
+    _Option(code: 'bike',     label: 'Bike',     asset: 'assets/images/gari.png',      base: 88,  etaMin: 3),
   ];
 
   late int _selectedIdx;
@@ -78,12 +80,24 @@ class _RideOptionsScreenState extends State<RideOptionsScreen>
   }
 
   void _onConfirm() {
+    final ride = context.read<RideState>();
     final sel = _options[_selectedIdx];
     final rideType = sel.toRideType();
-    context.read<RideState>()
+
+    // Subtotal rule (abhi simple): base + 120
+    final subtotal = (sel.base + 120).toDouble();
+
+    // Promo preview apply (UI-only)
+    final rc = ride.ridesCompleted; // TODO: backend se sync
+    final hasPromo = AppFlags.welcomePromoPreview && PromoPreview.eligible(rc);
+    final discount = hasPromo ? PromoPreview.discount(subtotal, rc) : 0.0;
+    final total    = hasPromo ? PromoPreview.total(subtotal, rc)    : subtotal;
+
+    ride
       ..setRideType(rideType)
       ..setEta(sel.etaMin)
-      ..setPrice(sel.base + 120);
+      ..setFare(subtotal: subtotal, discount: discount, total: total);
+
     Navigator.pushNamed(context, Routes.confirmPickup);
   }
 
@@ -109,9 +123,16 @@ class _RideOptionsScreenState extends State<RideOptionsScreen>
     final dst = ride.destination?.name ?? 'Select destination';
     final selected = _options[_selectedIdx];
 
-    // halos ko theme ke hisaab se adapt kar diya (light me halkay blue, dark me halka secondary tint)
+    // halos
     final haloOuter = cs.secondary.withOpacity(theme.brightness == Brightness.dark ? .15 : .18);
     final haloInner = cs.secondary.withOpacity(theme.brightness == Brightness.dark ? .08 : .12);
+
+    // --- Selected card ke liye live totals ---
+    final rc = ride.ridesCompleted;
+    final selectedSubtotal = (selected.base + 120).toDouble();
+    final selHasPromo = AppFlags.welcomePromoPreview && PromoPreview.eligible(rc);
+    final selectedDiscount = selHasPromo ? PromoPreview.discount(selectedSubtotal, rc) : 0.0;
+    final selectedTotal    = selHasPromo ? PromoPreview.total(selectedSubtotal, rc)    : selectedSubtotal;
 
     return Scaffold(
       backgroundColor: bg,
@@ -169,7 +190,7 @@ class _RideOptionsScreenState extends State<RideOptionsScreen>
 
           // ======= OPTIONS LIST =======
           SizedBox(
-            height: 146,
+            height: 160,
             child: ListView.separated(
               scrollDirection: Axis.horizontal,
               padding: const EdgeInsets.symmetric(horizontal: 4),
@@ -184,12 +205,18 @@ class _RideOptionsScreenState extends State<RideOptionsScreen>
                   child: _VehicleImage(assetPath: opt.asset, size: 56),
                 );
 
+                // Per-card subtotal/discount/total
+                final subtotal = (opt.base + 120).toDouble();
+                final hasPromo = AppFlags.welcomePromoPreview && PromoPreview.eligible(rc);
+                final discount = hasPromo ? PromoPreview.discount(subtotal, rc) : 0.0;
+                final total    = hasPromo ? PromoPreview.total(subtotal, rc)    : subtotal;
+
                 return InkWell(
                   borderRadius: BorderRadius.circular(18),
                   onTap: () => _onSelect(i),
                   child: AnimatedContainer(
                     duration: const Duration(milliseconds: 180),
-                    width: 130,
+                    width: 150,
                     padding: const EdgeInsets.fromLTRB(12, 12, 12, 10),
                     decoration: BoxDecoration(
                       color: card,
@@ -211,13 +238,48 @@ class _RideOptionsScreenState extends State<RideOptionsScreen>
                       children: [
                         if (isSelected) HeroMode(enabled: false, child: img) else img,
                         const SizedBox(height: 10),
-                        Text(
-                          '${opt.base}',
-                          style: tt.titleMedium!.copyWith(
-                            fontWeight: FontWeight.w800,
-                            color: onBg.withOpacity(.8),
+
+                        // Price showing: strike-through + final
+                        if (hasPromo) ...[
+                          Text(
+                            'PKR ${subtotal.toStringAsFixed(0)}',
+                            style: tt.bodyMedium!.copyWith(
+                              decoration: TextDecoration.lineThrough,
+                              color: cs.onSurfaceVariant,
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
-                        ),
+                          const SizedBox(height: 2),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                decoration: BoxDecoration(
+                                  color: cs.secondaryContainer,
+                                  borderRadius: BorderRadius.circular(999),
+                                ),
+                                child: Text(
+                                  '-20% Est.',
+                                  style: tt.labelSmall!.copyWith(color: cs.onSecondaryContainer, fontWeight: FontWeight.w700),
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                'PKR ${total.toStringAsFixed(0)}',
+                                style: tt.titleMedium!.copyWith(fontWeight: FontWeight.w800),
+                              ),
+                            ],
+                          ),
+                        ] else ...[
+                          Text(
+                            'PKR ${subtotal.toStringAsFixed(0)}',
+                            style: tt.titleMedium!.copyWith(
+                              fontWeight: FontWeight.w800,
+                              color: onBg.withOpacity(.85),
+                            ),
+                          ),
+                        ],
                       ],
                     ),
                   ),
@@ -228,11 +290,14 @@ class _RideOptionsScreenState extends State<RideOptionsScreen>
 
           const SizedBox(height: 18),
           _ConfirmCard(
-            priceText: 'Rs. ${selected.base + 120}',
+            priceText: 'PKR ${selectedTotal.toStringAsFixed(0)}',
             enabled: true,
             onPressed: _onConfirm,
             cs: cs,
             card: card,
+            banner: selHasPromo
+                ? 'WELCOME20 • ${PromoPreview.remaining(rc)} ride(s) left • Applied at checkout'
+                : null,
           ),
         ],
       ),
@@ -373,15 +438,18 @@ class _ConfirmCard extends StatelessWidget {
     required this.onPressed,
     required this.cs,
     required this.card,
+    this.banner,
   });
   final String priceText;
   final bool enabled;
   final VoidCallback onPressed;
   final ColorScheme cs;
   final Color card;
+  final String? banner;
 
   @override
   Widget build(BuildContext context) {
+    final tt = Theme.of(context).textTheme;
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
       decoration: BoxDecoration(
@@ -389,35 +457,50 @@ class _ConfirmCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(22),
         boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 14, offset: const Offset(0, 8))],
       ),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Expanded(
-            child: Container(
-              height: 56,
-              alignment: Alignment.centerLeft,
-              padding: const EdgeInsets.symmetric(horizontal: 18),
-              decoration: BoxDecoration(color: cs.primary, borderRadius: BorderRadius.circular(28)),
-              child: Text(
-                priceText,
-                style: Theme.of(context).textTheme.titleLarge!.copyWith(
-                  color: cs.onPrimary,
-                  fontWeight: FontWeight.w800,
+          if (banner != null) ...[
+            Row(
+              children: [
+                Icon(Icons.local_offer, size: 18, color: cs.primary),
+                const SizedBox(width: 6),
+                Expanded(child: Text(banner!, style: tt.bodySmall)),
+              ],
+            ),
+            const SizedBox(height: 10),
+          ],
+          Row(
+            children: [
+              Expanded(
+                child: Container(
+                  height: 56,
+                  alignment: Alignment.centerLeft,
+                  padding: const EdgeInsets.symmetric(horizontal: 18),
+                  decoration: BoxDecoration(color: cs.primary, borderRadius: BorderRadius.circular(28)),
+                  child: Text(
+                    priceText,
+                    style: tt.titleLarge!.copyWith(
+                      color: cs.onPrimary,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
                 ),
               ),
-            ),
-          ),
-          const SizedBox(width: 12),
-          SizedBox(
-            width: 64, height: 56,
-            child: ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                elevation: 0,
-                backgroundColor: enabled ? cs.primary : Theme.of(context).disabledColor,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+              const SizedBox(width: 12),
+              SizedBox(
+                width: 64, height: 56,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    elevation: 0,
+                    backgroundColor: enabled ? cs.primary : Theme.of(context).disabledColor,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+                  ),
+                  onPressed: enabled ? onPressed : null,
+                  child: Icon(Icons.check, color: cs.onPrimary),
+                ),
               ),
-              onPressed: enabled ? onPressed : null,
-              child: Icon(Icons.check, color: cs.onPrimary),
-            ),
+            ],
           ),
         ],
       ),

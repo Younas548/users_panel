@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 // ENTRY / CORE
-import '../presentation/screens/permissions/permissions_screen.dart';
+//import '../presentation/screens/permissions/permissions_screen.dart';
 import '../presentation/screens/homes/home_screen.dart';
 
 // PLACES
@@ -58,7 +58,7 @@ class Routes {
   // ---- Simple map: only arg-less screens yahan rakho ----
   static final Map<String, WidgetBuilder> map = {
     // core
-    permissions: (_) => const PermissionsScreen(),
+   //permissions: (_) => const PermissionsScreen(),
     home:        (_) => const HomeScreen(),
     root:        (_) => const HomeScreen(), // alias
 

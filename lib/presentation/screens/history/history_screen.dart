@@ -68,8 +68,8 @@ class _RideHistoryScreenState extends State<RideHistoryScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final cs = theme.colorScheme;
+   // final theme = Theme.of(context);
+    //final cs = theme.colorScheme;
 
     return Scaffold(
       appBar: AppBar(

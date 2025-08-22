@@ -36,7 +36,7 @@ class ZoomigooApp extends StatelessWidget {
             themeMode: app.themeMode,
 
             // ROUTING (primary)
-            initialRoute: Routes.permissions,
+            initialRoute: Routes.home,
             routes: Routes.map,
 
             // SAFETY NET: if a route (like /wallet) isn't found in Routes.map,
