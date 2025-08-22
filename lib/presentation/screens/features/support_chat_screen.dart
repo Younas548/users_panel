@@ -85,7 +85,7 @@ class _SupportChatScreenState extends State<SupportChatScreen> {
                         maxWidth: MediaQuery.of(context).size.width * 0.78,
                       ),
                       decoration: BoxDecoration(
-                        color: m.me ? cs.primary : cs.surfaceVariant,
+                        color: m.me ? cs.primary : cs.surfaceContainerHighest,
                         borderRadius: BorderRadius.only(
                           topLeft: const Radius.circular(14),
                           topRight: const Radius.circular(14),
@@ -127,7 +127,7 @@ class _SupportChatScreenState extends State<SupportChatScreen> {
                       decoration: InputDecoration(
                         hintText: 'Type a message…',
                         filled: true,
-                        fillColor: Theme.of(context).colorScheme.surfaceVariant,
+                        fillColor: Theme.of(context).colorScheme.surfaceContainerHighest,
                         contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),

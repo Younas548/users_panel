@@ -776,7 +776,7 @@ class _PlacesSheet extends StatefulWidget {
 }
 
 class _PlacesSheetState extends State<_PlacesSheet> {
-  late List<SavedPlace> _items = widget.places;
+  late final List<SavedPlace> _items = widget.places;
 
   void _addOrEdit({SavedPlace? existing, int? index}) {
     final theme = Theme.of(context);

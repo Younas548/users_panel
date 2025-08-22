@@ -80,7 +80,7 @@ ElevatedButtonThemeData zElevatedButtonTheme(Color bg, Color fg) {
       foregroundColor: fg,
       elevation: 2,
       padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Corners.r16)),
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Corners.r16)),
     ),
   );
 }
@@ -94,7 +94,7 @@ InputDecorationTheme zInputDecorationTheme({required bool dark}) {
     fillColor: fill,
     contentPadding: const EdgeInsets.all(14),
     border: OutlineInputBorder(
-      borderRadius: BorderRadius.all(Corners.r14),
+      borderRadius: const BorderRadius.all(Corners.r14),
       borderSide: BorderSide(color: stroke),
     ),
     enabledBorder: OutlineInputBorder(

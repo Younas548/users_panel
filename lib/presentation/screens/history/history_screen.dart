@@ -133,7 +133,7 @@ class _RideHistoryScreenState extends State<RideHistoryScreen> {
             child: _loading
                 ? const _HistorySkeleton()
                 : _filtered.isEmpty
-                    ? _EmptyState(
+                    ? const _EmptyState(
                         message:
                             'Koi ride history nahi mili.\nNayi ride book karein, yahan dikh jayegi.',
                       )
@@ -503,14 +503,14 @@ class _DashedDivider extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(builder: (context, c) {
-      final dashWidth = 6.0;
-      final dashSpace = 4.0;
+      const dashWidth = 6.0;
+      const dashSpace = 4.0;
       final count = (c.maxWidth / (dashWidth + dashSpace)).floor();
       return Row(
         children: List.generate(
           count,
           (_) => Padding(
-            padding: EdgeInsets.only(right: dashSpace),
+            padding: const EdgeInsets.only(right: dashSpace),
             child: SizedBox(
               width: dashWidth,
               height: 1.5,

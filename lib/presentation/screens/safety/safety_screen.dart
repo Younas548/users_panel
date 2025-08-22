@@ -50,8 +50,8 @@ class _SafetyScreenState extends State<SafetyScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Row(
-              children: const [
+            const Row(
+              children: [
                 Icon(Icons.link, size: 20),
                 SizedBox(width: 8),
                 Text('Trip link', style: TextStyle(fontWeight: FontWeight.w600)),
@@ -315,7 +315,7 @@ class _ResponsiveSOSDialog extends StatelessWidget {
             ),
             child: Stack(
               children: [
-                Positioned(
+                const Positioned(
                   right: -8,
                   bottom: -10,
                   child: Opacity(
@@ -357,8 +357,8 @@ class _ResponsiveSOSDialog extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 12),
-                      Row(
-                        children: const [
+                      const Row(
+                        children: [
                           Icon(Icons.timer_rounded, color: Colors.white70, size: 18),
                           SizedBox(width: 6),
                           Expanded(
@@ -370,8 +370,8 @@ class _ResponsiveSOSDialog extends StatelessWidget {
                         ],
                       ),
                       const SizedBox(height: 6),
-                      Row(
-                        children: const [
+                      const Row(
+                        children: [
                           Icon(Icons.link_rounded, color: Colors.white70, size: 18),
                           SizedBox(width: 6),
                           Expanded(

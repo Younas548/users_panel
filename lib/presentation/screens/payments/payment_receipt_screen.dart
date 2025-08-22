@@ -24,7 +24,7 @@ class PaymentReceiptScreen extends StatelessWidget {
         child: Card(
           elevation: 0,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          color: cs.surfaceVariant.withValues(alpha:0.5),
+          color: cs.surfaceContainerHighest.withValues(alpha:0.5),
           child: Padding(
             padding: const EdgeInsets.all(16),
             child: Column(

@@ -337,9 +337,9 @@ class _RouteCard extends StatelessWidget {
       child: Row(
         children: [
           Column(children: [
-            _Dot(color: const Color(0xFF21C06B), outlined: true),
+            const _Dot(color: Color(0xFF21C06B), outlined: true),
             Container(width: 2, height: 16, color: divider),
-            _Dot(color: const Color(0xFF6D74FF)),
+            const _Dot(color: Color(0xFF6D74FF)),
           ]),
           const SizedBox(width: 12),
           Expanded(

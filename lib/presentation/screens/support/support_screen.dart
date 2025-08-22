@@ -209,8 +209,8 @@ class _SupportScreenState extends State<SupportScreen> {
             title: 'FAQs',
             icon: Icons.help_outline,
             accent: cs.tertiary,
-            child: Column(
-              children: const [
+            child: const Column(
+              children: [
                 _FaqTile(
                   q: 'How do refunds work?',
                   a: 'Refunds for valid claims are processed to your original payment method within 3–5 business days.',

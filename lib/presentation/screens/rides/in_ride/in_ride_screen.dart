@@ -52,7 +52,7 @@ class InRideScreen extends StatelessWidget {
                     borderRadius: BorderRadius.all(Radius.circular(16)),
                     child: MapStub(height: 240),
                   ),
-                  Positioned(
+                  const Positioned(
                     right: 10, top: 10,
                     child: _MiniChip(text: 'ETA $etaText', icon: Icons.timer_outlined),
                   ),
@@ -89,9 +89,9 @@ class InRideScreen extends StatelessWidget {
                       children: [
                         _titleBold('Arslan Aslam', context, maxLines: 1),
                         const SizedBox(height: 2),
-                        Row(
+                        const Row(
                           mainAxisSize: MainAxisSize.min,
-                          children: const [
+                          children: [
                             Icon(Icons.star_rounded, size: 16, color: Colors.amber),
                             SizedBox(width: 4),
                             Flexible(
@@ -144,12 +144,12 @@ class InRideScreen extends StatelessWidget {
           ),
 
           // ===== Progress (simple + airy) =====
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
+          const Padding(
+            padding: EdgeInsets.fromLTRB(16, 4, 16, 16),
             child: _GlassCard(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: const [
+                children: [
                   _StepBar(current: 1, total: 3),
                   SizedBox(height: 8),
                   _StepLabels(labels: ['Picked up', 'En route', 'Drop-off']),
