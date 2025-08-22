@@ -184,7 +184,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 16),
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(14),
-                            border: Border.all(color: Colors.white.withOpacity(0.35)),
+                            border: Border.all(color: Colors.white.withValues(alpha: .35)),
                           ),
                           child: Row(
                             children: [
@@ -211,7 +211,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: Colors.white.withOpacity(0.35)),
+                            border: Border.all(color: Colors.white.withValues(alpha: .35)),
                           ),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -254,7 +254,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                               label: const Text('Home'),
                               style: OutlinedButton.styleFrom(
                                 minimumSize: const Size.fromHeight(48),
-                                side: BorderSide(color: Colors.white.withOpacity(0.35)),
+                                side: BorderSide(color: Colors.white.withValues(alpha: .35)),
                               ),
                             ),
                           ),
@@ -266,7 +266,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                               label: const Text('Work'),
                               style: OutlinedButton.styleFrom(
                                 minimumSize: const Size.fromHeight(48),
-                                side: BorderSide(color: Colors.white.withOpacity(0.35)),
+                                side: BorderSide(color: Colors.white.withValues(alpha: .35)),
                               ),
                             ),
                           ),
@@ -293,7 +293,7 @@ class _ProminentMenuButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final color = Theme.of(context).colorScheme.primary;
     return Material(
-      color: color.withOpacity(0.15),
+      color: color.withValues(alpha: .15),
       borderRadius: BorderRadius.circular(24),
       child: InkWell(
         onTap: onTap,
@@ -311,7 +311,7 @@ class _ProminentMenuButton extends StatelessWidget {
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(                     // subtle pop
-                      color: color.withOpacity(0.35),
+                      color: color.withValues(alpha: .35),
                       blurRadius: 10,
                       offset: const Offset(0, 3),
                     ),
@@ -353,7 +353,7 @@ class _TopRightDrawer extends StatelessWidget {
             // Profile header (optional)
             ListTile(
               leading: CircleAvatar(
-                backgroundColor: theme.colorScheme.primary.withOpacity(.12),
+                backgroundColor: theme.colorScheme.primary.withValues(alpha: .12),
                 child: Icon(Icons.person, color: theme.colorScheme.primary),
               ),
               title: const Text('Your Profile'),
@@ -448,10 +448,10 @@ class _GlassPanel extends StatelessWidget {
           decoration: BoxDecoration(
             color: bg.withValues(alpha: 0.55), // glassy
             borderRadius: BorderRadius.circular(18),
-            border: Border.all(color: Colors.white.withOpacity(0.35)),
+            border: Border.all(color: Colors.white.withValues(alpha: .35)),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.15),
+                color: Colors.black.withValues(alpha: .15),
                 blurRadius: 14,
                 offset: const Offset(0, 8),
               ),
@@ -503,13 +503,13 @@ class _PrimaryCTAState extends State<_PrimaryCTA> {
               end: Alignment.bottomRight,
               colors: [
                 base,
-                base.withOpacity(0.92),
+                base.withValues(alpha: .92),
               ],
             ),
             borderRadius: BorderRadius.circular(28),
             boxShadow: [
               BoxShadow(
-                color: base.withOpacity(0.35),
+                color: base.withValues(alpha: .35),
                 blurRadius: 16,
                 offset: const Offset(0, 6),
               ),
@@ -526,7 +526,7 @@ class _PrimaryCTAState extends State<_PrimaryCTA> {
                     width: 28,
                     height: 28,
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.18),
+                      color: Colors.white.withValues(alpha: .18),
                       shape: BoxShape.circle,
                     ),
                     child: const Icon(Icons.directions_car_filled, size: 16, color: Colors.white),

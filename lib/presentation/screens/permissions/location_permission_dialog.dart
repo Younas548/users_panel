@@ -99,7 +99,7 @@ class _DialogContentState extends State<_DialogContent> {
                 child: Container(
                   width: 90, height: 90,
                   decoration: BoxDecoration(
-                    color: cs.primary.withOpacity(.12),
+                    color: cs.primary.withValues(alpha:.12),
                     shape: BoxShape.circle,
                   ),
                 ),

@@ -77,7 +77,7 @@ class InRideScreen extends StatelessWidget {
                 children: [
                   CircleAvatar(
                     radius: 24,
-                    backgroundColor: theme.colorScheme.primary.withOpacity(.12),
+                    backgroundColor: theme.colorScheme.primary.withValues(alpha: .12),
                     child: Icon(Icons.person, color: theme.colorScheme.primary),
                   ),
                   const SizedBox(width: 12),
@@ -109,7 +109,7 @@ class InRideScreen extends StatelessWidget {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: theme.textTheme.bodySmall?.copyWith(
-                            color: theme.textTheme.bodySmall?.color?.withOpacity(.8),
+                            color: theme.textTheme.bodySmall?.color?.withValues(alpha: .8),
                           ),
                         ),
                       ],
@@ -305,12 +305,12 @@ class _GlassCard extends StatelessWidget {
         filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
         child: Container(
           decoration: BoxDecoration(
-            color: bg.withOpacity(.75),
+            color: bg.withValues(alpha: .75),
             borderRadius: BorderRadius.circular(radius),
-            border: Border.all(color: Colors.white.withOpacity(.18)),
+            border: Border.all(color: Colors.white.withValues(alpha: .18)),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(.08),
+                color: Colors.black.withValues(alpha: .08),
                 blurRadius: 14,
                 offset: const Offset(0, 8),
               ),
@@ -337,8 +337,8 @@ class _MiniChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: c.primary.withOpacity(.10),
-        border: Border.all(color: c.primary.withOpacity(.35)),
+        color: c.primary.withValues(alpha: .10),
+        border: Border.all(color: c.primary.withValues(alpha: .35)),
         borderRadius: BorderRadius.circular(999),
       ),
       child: Row(
@@ -371,7 +371,7 @@ class _CompactRouteBar extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
       decoration: BoxDecoration(
-        color: Colors.black.withOpacity(.40),
+        color: Colors.black.withValues(alpha: .40),
         borderRadius: BorderRadius.circular(10),
       ),
       child: Row(
@@ -431,7 +431,7 @@ class _RoundIconButton extends StatelessWidget {
         child: Container(
           width: 40, height: 40,
           decoration: BoxDecoration(
-            color: c.primary.withOpacity(.10),
+            color: c.primary.withValues(alpha: .10),
             shape: BoxShape.circle,
           ),
           child: Icon(icon, color: c.primary),
@@ -458,7 +458,7 @@ class _StepBar extends StatelessWidget {
             height: 6,
             margin: EdgeInsets.only(right: i == total - 1 ? 0 : 6),
             decoration: BoxDecoration(
-              color: active ? c.primary : Colors.grey.withOpacity(.25),
+              color: active ? c.primary : Colors.grey.withValues(alpha: .25),
               borderRadius: BorderRadius.circular(99),
             ),
           ),
@@ -515,7 +515,7 @@ class _SafetyButton extends StatelessWidget {
       height: 52,
       child: ElevatedButton.icon(
         style: ElevatedButton.styleFrom(
-          backgroundColor: color.withOpacity(.12),
+          backgroundColor: color.withValues(alpha: .12),
           foregroundColor: color,
           elevation: 0,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),

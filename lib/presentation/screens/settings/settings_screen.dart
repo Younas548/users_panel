@@ -299,8 +299,8 @@ class _Header extends StatelessWidget {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: isDarkMode
-              ? [cs.surfaceVariant.withOpacity(0.16), cs.primary.withOpacity(0.20)]
-              : [cs.primaryContainer.withOpacity(0.45), cs.primary.withOpacity(0.40)],
+              ? [cs.surfaceContainerHighest.withValues(alpha:0.16), cs.primary.withValues(alpha:0.20)]
+              : [cs.primaryContainer.withValues(alpha:0.45), cs.primary.withValues(alpha:0.40)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -310,7 +310,7 @@ class _Header extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.18),
+              color: Colors.white.withValues(alpha:0.18),
               borderRadius: BorderRadius.circular(16),
             ),
             child: const Icon(Icons.tune_rounded, color: Colors.white, size: 26),
@@ -338,8 +338,8 @@ class _Header extends StatelessWidget {
               padding: WidgetStateProperty.all(const EdgeInsets.symmetric(horizontal: 8)),
               backgroundColor: WidgetStateProperty.resolveWith(
                 (states) => states.contains(WidgetState.selected)
-                    ? Colors.white.withOpacity(0.22)
-                    : Colors.white.withOpacity(0.12),
+                    ? Colors.white.withValues(alpha:0.22)
+                    : Colors.white.withValues(alpha:0.12),
               ),
               foregroundColor: WidgetStateProperty.all(Colors.white),
             ),
@@ -368,7 +368,7 @@ class _SectionCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final surface = theme.colorScheme.surface;
-    final onSurface = theme.colorScheme.onSurface.withOpacity(0.9);
+    final onSurface = theme.colorScheme.onSurface.withValues(alpha:0.9);
 
     return Card(
       elevation: 1,
@@ -386,7 +386,7 @@ class _SectionCard extends StatelessWidget {
               children: [
                 CircleAvatar(
                   radius: 18,
-                  backgroundColor: accent.withOpacity(0.12),
+                  backgroundColor: accent.withValues(alpha:0.12),
                   child: Icon(icon, color: accent),
                 ),
                 const SizedBox(width: 10),

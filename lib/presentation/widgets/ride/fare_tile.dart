@@ -18,7 +18,7 @@ class FareTile extends StatelessWidget {
       trailing: Text(Formatters.currency(type.base)),
       leading: Icon(selected ? Icons.check_circle : Icons.radio_button_unchecked),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      tileColor: selected ? Theme.of(context).colorScheme.primary.withOpacity(0.08) : null,
+      tileColor: selected ? Theme.of(context).colorScheme.primary.withValues(alpha:0.08) : null,
     );
   }
 }

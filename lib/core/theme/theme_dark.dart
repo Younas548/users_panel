@@ -30,7 +30,7 @@ ThemeData buildDarkTheme(Color seed) {
       color: ZColors.cardDark,
       margin: EdgeInsets.zero,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      shadowColor: Colors.black.withOpacity(.25),
+      shadowColor: Colors.black.withValues(alpha: .25),
       elevation: 0,
     ),
 

@@ -30,7 +30,7 @@ class DriverCard extends StatelessWidget {
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       elevation: 0,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-      color: cs.surface.withOpacity(0.96),
+      color: cs.surface.withValues(alpha:0.96),
       child: Container(
         constraints: const BoxConstraints(minHeight: 100),
         padding: const EdgeInsets.all(14),
@@ -77,7 +77,7 @@ class DriverCard extends StatelessWidget {
                     style: Theme.of(context)
                         .textTheme
                         .bodyMedium
-                        ?.copyWith(color: cs.onSurface.withOpacity(0.6)),
+                        ?.copyWith(color: cs.onSurface.withValues(alpha:0.6)),
                   ),
                 ],
               ),
@@ -93,7 +93,7 @@ class DriverCard extends StatelessWidget {
               decoration: BoxDecoration(
                 color: cs.surface,
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: cs.outline.withOpacity(0.25)),
+                border: Border.all(color: cs.outline.withValues(alpha:0.25)),
               ),
               child: Image.asset(
                 carImage,
@@ -119,7 +119,7 @@ class _RatingPill extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: cs.primaryContainer.withOpacity(0.6),
+        color: cs.primaryContainer.withValues(alpha:0.6),
         borderRadius: BorderRadius.circular(999),
       ),
       child: Row(

@@ -155,7 +155,7 @@ class _SafetyScreenState extends State<SafetyScreen> {
           Text(
             'Use SOS in emergencies and share your trip link with trusted contacts.',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.8),
+                  color: Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.8),
                 ),
           ),
           const SizedBox(height: 16),
@@ -170,7 +170,7 @@ class _SafetyScreenState extends State<SafetyScreen> {
                 contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
                 leading: CircleAvatar(
                   radius: 22,
-                  backgroundColor: Colors.red.withOpacity(0.12),
+                  backgroundColor: Colors.red.withValues(alpha: .12),
                   child: const Icon(Icons.sos, color: Colors.red),
                 ),
                 title: const Text('Emergency SOS'),
@@ -212,7 +212,7 @@ class _SafetyScreenState extends State<SafetyScreen> {
               contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               leading: CircleAvatar(
                 radius: 22,
-                backgroundColor: cs.primary.withOpacity(0.12),
+                backgroundColor: cs.primary.withValues(alpha: 0.12),
                 child: Icon(Icons.share, color: cs.primary),
               ),
               title: const Text('Share trip status'),
@@ -306,8 +306,8 @@ class _ResponsiveSOSDialog extends StatelessWidget {
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
-                  scheme.error.withOpacity(0.90),
-                  scheme.error.withOpacity(0.75),
+                  scheme.error.withValues(alpha:0.90),
+                  scheme.error.withValues(alpha: 0.75),
                 ],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
@@ -352,7 +352,7 @@ class _ResponsiveSOSDialog extends StatelessWidget {
                             ? 'Auto-share is ON.\nYour trusted contacts will be notified.'
                             : 'Auto-share is OFF.\nYou can enable it on the Safety screen.',
                         style: TextStyle(
-                          color: Colors.white.withOpacity(0.95),
+                          color: Colors.white.withValues(alpha:0.95),
                           height: 1.25,
                         ),
                       ),
@@ -384,7 +384,7 @@ class _ResponsiveSOSDialog extends StatelessWidget {
                       ),
                       const Spacer(),
                       Center(
-                        child: Icon(Icons.shield_rounded, color: Colors.white.withOpacity(0.9), size: 48),
+                        child: Icon(Icons.shield_rounded, color: Colors.white.withValues(alpha:0.9), size: 48),
                       ),
                     ],
                   ),

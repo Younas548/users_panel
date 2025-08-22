@@ -136,9 +136,9 @@ class _ProfileScreenState extends State<ProfileScreen>
                     decoration: InputDecoration(
                       hintText: hint,
                       hintStyle: theme.textTheme.bodyMedium
-                          ?.copyWith(color: cs.onSurface.withOpacity(0.6)),
+                          ?.copyWith(color: cs.onSurface.withValues(alpha:0.6)),
                       filled: true,
-                      fillColor: theme.cardColor.withOpacity(0.12),
+                      fillColor: theme.cardColor.withValues(alpha:0.12),
                     ),
                     cursorColor: cs.primary,
                     style: theme.textTheme.bodyMedium?.copyWith(color: cs.onSurface),
@@ -190,7 +190,7 @@ class _ProfileScreenState extends State<ProfileScreen>
       extendBodyBehindAppBar: true,
       appBar: AppBar(
         title: const Text('Profile'),
-        backgroundColor: cs.surface.withOpacity(0.92), // visible in light/dark
+        backgroundColor: cs.surface.withValues(alpha:0.92), // visible in light/dark
         foregroundColor: cs.onSurface,
         elevation: 1,
       ),
@@ -200,7 +200,7 @@ class _ProfileScreenState extends State<ProfileScreen>
           Container(
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [bg, cs.secondaryContainer.withOpacity(0.25), bg],
+                colors: [bg, cs.secondaryContainer.withValues(alpha:0.25), bg],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
@@ -209,11 +209,11 @@ class _ProfileScreenState extends State<ProfileScreen>
           Positioned(
               top: -70,
               left: -30,
-              child: _blurBlob(200, cs.secondary.withOpacity(0.10))),
+              child: _blurBlob(200, cs.secondary.withValues(alpha:0.10))),
           Positioned(
               bottom: -60,
               right: -20,
-              child: _blurBlob(220, cs.primary.withOpacity(0.12))),
+              child: _blurBlob(220, cs.primary.withValues(alpha: .12))),
 
           // Content
           SafeArea(
@@ -531,11 +531,11 @@ class _HeaderCard extends StatelessWidget {
                     padding: const EdgeInsets.all(2),
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      border: Border.all(color: cs.outline.withOpacity(0.35)),
+                      border: Border.all(color: cs.outline.withValues(alpha: .35)),
                     ),
                     child: CircleAvatar(
                       radius: 34,
-                      backgroundColor: theme.cardColor.withOpacity(0.08),
+                      backgroundColor: theme.cardColor.withValues(alpha: .08),
                       backgroundImage: avatarProvider,
                     ),
                   ),
@@ -552,9 +552,9 @@ class _HeaderCard extends StatelessWidget {
                       padding: const EdgeInsets.symmetric(
                           horizontal: 10, vertical: 6),
                       decoration: BoxDecoration(
-                        color: cs.primary.withOpacity(0.10),
+                        color: cs.primary.withValues(alpha: .10),
                         borderRadius: BorderRadius.circular(999),
-                        border: Border.all(color: cs.primary.withOpacity(0.35)),
+                        border: Border.all(color: cs.primary.withValues(alpha: .35)),
                       ),
            
                     ),
@@ -624,7 +624,7 @@ class _EditRow extends StatelessWidget {
           children: [
             Text(label,
                 style: theme.textTheme.bodyMedium
-                    ?.copyWith(color: cs.onSurface.withOpacity(0.7))),
+                    ?.copyWith(color: cs.onSurface.withValues(alpha: .7))),
             const SizedBox(width: 8),
             Expanded(
               child: Text(
@@ -634,7 +634,7 @@ class _EditRow extends StatelessWidget {
                     ?.copyWith(fontWeight: FontWeight.w800),
               ),
             ),
-            Icon(Icons.edit, size: 16, color: cs.onSurface.withOpacity(0.8)),
+            Icon(Icons.edit, size: 16, color: cs.onSurface.withValues(alpha: .8)),
           ],
         ),
       ),
@@ -655,7 +655,7 @@ class _GlassCard extends StatelessWidget {
 
     // lighter in light theme; translucent in dark
     final Color bg =
-        isDark ? theme.colorScheme.surface.withOpacity(0.20) : Colors.white.withOpacity(0.85);
+        isDark ? theme.colorScheme.surface.withValues(alpha: .20) : Colors.white.withValues(alpha: .85);
 
     return ClipRRect(
       borderRadius: BorderRadius.circular(22),
@@ -726,7 +726,7 @@ class _GlassSheet extends StatelessWidget {
         filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
         child: Container(
           decoration: BoxDecoration(
-            color: theme.colorScheme.surface.withOpacity(0.95),
+            color: theme.colorScheme.surface.withValues(alpha: .95),
             border: Border(top: BorderSide(color: divider)),
           ),
           child: child,
@@ -809,7 +809,7 @@ class _PlacesSheetState extends State<_PlacesSheet> {
                   decoration: InputDecoration(
                     hintText: 'Label (e.g., Home, Gym)',
                     filled: true,
-                    fillColor: theme.cardColor.withOpacity(0.12),
+                    fillColor: theme.cardColor.withValues(alpha: .12),
                   ),
                   validator: (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
                 ),
@@ -819,7 +819,7 @@ class _PlacesSheetState extends State<_PlacesSheet> {
                   decoration: InputDecoration(
                     hintText: 'Address / landmark',
                     filled: true,
-                    fillColor: theme.cardColor.withOpacity(0.12),
+                    fillColor: theme.cardColor.withValues(alpha: .12),
                   ),
                   validator: (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
                 ),

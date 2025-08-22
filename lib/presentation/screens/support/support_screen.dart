@@ -86,8 +86,8 @@ class _SupportScreenState extends State<SupportScreen> {
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
-                  cs.primaryContainer.withOpacity(0.55),
-                  cs.primary.withOpacity(0.50),
+                  cs.primaryContainer.withValues(alpha:0.55),
+                  cs.primary.withValues(alpha:0.50),
                 ],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
@@ -98,7 +98,7 @@ class _SupportScreenState extends State<SupportScreen> {
                 Container(
                   padding: const EdgeInsets.all(14),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.14),
+                    color: Colors.white.withValues(alpha:0.14),
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: const Icon(Icons.support_agent_rounded,
@@ -120,7 +120,7 @@ class _SupportScreenState extends State<SupportScreen> {
                   label: const Text('Chat'),
                   style: FilledButton.styleFrom(
                     foregroundColor: Colors.white,
-                    backgroundColor: Colors.white.withOpacity(0.18),
+                    backgroundColor: Colors.white.withValues(alpha:0.18),
                   ),
                   onPressed: () {
                     Navigator.push(
@@ -240,7 +240,7 @@ class _SupportScreenState extends State<SupportScreen> {
               children: [
                 ListTile(
                   leading: CircleAvatar(
-                    backgroundColor: cs.secondary.withOpacity(0.12),
+                    backgroundColor: cs.secondary.withValues(alpha:0.12),
                     child: Icon(Icons.email_outlined, color: cs.secondary),
                   ),
                   title: const Text('Email support'),
@@ -251,7 +251,7 @@ class _SupportScreenState extends State<SupportScreen> {
                 const Divider(height: 1),
                 ListTile(
                   leading: CircleAvatar(
-                    backgroundColor: cs.primary.withOpacity(0.12),
+                    backgroundColor: cs.primary.withValues(alpha:0.12),
                     child: Icon(Icons.call_outlined, color: cs.primary),
                   ),
                   title: const Text('Call center'),
@@ -262,7 +262,7 @@ class _SupportScreenState extends State<SupportScreen> {
                 const Divider(height: 1),
                 ListTile(
                   leading: CircleAvatar(
-                    backgroundColor: cs.tertiary.withOpacity(0.12),
+                    backgroundColor: cs.tertiary.withValues(alpha:0.12),
                     child: Icon(Icons.chat_bubble_rounded, color: cs.tertiary),
                   ),
                   title: const Text('WhatsApp (fastest)'),
@@ -407,7 +407,7 @@ class _IssueTile extends StatelessWidget {
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       leading: CircleAvatar(
         radius: 22,
-        backgroundColor: color.withOpacity(0.12),
+        backgroundColor: color.withValues(alpha:0.12),
         child: Icon(icon, color: color),
       ),
       title: Text(title, style: const TextStyle(fontWeight: FontWeight.w700)),
@@ -455,7 +455,7 @@ class _SectionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final surface = Theme.of(context).colorScheme.surface;
-    final onSurface = Theme.of(context).colorScheme.onSurface.withOpacity(0.8);
+    final onSurface = Theme.of(context).colorScheme.onSurface.withValues(alpha:0.8);
 
     return Card(
       elevation: 1,
@@ -473,7 +473,7 @@ class _SectionCard extends StatelessWidget {
               children: [
                 CircleAvatar(
                   radius: 18,
-                  backgroundColor: accent.withOpacity(0.12),
+                  backgroundColor: accent.withValues(alpha:0.12),
                   child: Icon(icon, color: accent),
                 ),
                 const SizedBox(width: 10),

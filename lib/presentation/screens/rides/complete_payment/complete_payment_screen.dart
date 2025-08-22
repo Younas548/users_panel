@@ -39,8 +39,8 @@ class CompletePaymentScreen extends StatelessWidget {
             colors: [
               bg,
               theme.brightness == Brightness.dark
-                  ? bg.withOpacity(.96)
-                  : bg.withOpacity(.98),
+                  ? bg.withValues(alpha: .96)
+                  : bg.withValues(alpha: .98),
             ],
           ),
         ),
@@ -141,7 +141,7 @@ class _SuccessCard extends StatelessWidget {
         border: Border.all(color: divider, width: 1),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.08),
+            color: Colors.black.withValues(alpha: 0.08),
             blurRadius: 24,
             offset: const Offset(0, 16),
           ),
@@ -169,14 +169,14 @@ class _SuccessCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
-              color: cs.secondary.withOpacity(.15),
+              color: cs.secondary.withValues(alpha: .15),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(color: divider),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.place_rounded, size: 16, color: cs.onSurface.withOpacity(.8)),
+                Icon(Icons.place_rounded, size: 16, color: cs.onSurface.withValues(alpha: .8)),
                 const SizedBox(width: 6),
               ],
             ),
@@ -184,12 +184,12 @@ class _SuccessCard extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             dest,
-            style: tt.bodySmall?.copyWith(color: cs.onSurface.withOpacity(.7), fontSize: 13.5),
+            style: tt.bodySmall?.copyWith(color: cs.onSurface.withValues(alpha: .7), fontSize: 13.5),
           ),
           const SizedBox(height: 4),
           Text(
             'Thanks for riding with Zoomigoo!',
-            style: tt.bodySmall?.copyWith(color: cs.onSurface.withOpacity(.7)),
+            style: tt.bodySmall?.copyWith(color: cs.onSurface.withValues(alpha: .7)),
           ),
         ],
       ),
@@ -244,7 +244,7 @@ class _RatingBlockState extends State<_RatingBlock> {
                 onLongPress: () => setState(() => _stars = 0),
                 // theme-aware colors
                 filledColor: Colors.amber, // nice on both themes
-                emptyColor: cs.onSurface.withOpacity(.45),
+                emptyColor: cs.onSurface.withValues(alpha: .45),
               );
             }),
           ),
@@ -255,7 +255,7 @@ class _RatingBlockState extends State<_RatingBlock> {
             decoration: InputDecoration(
               hintText: 'Additional feedback (optional)',
               // rely on global InputDecorationTheme; only tweak hint color
-              hintStyle: tt.bodyMedium?.copyWith(color: cs.onSurface.withOpacity(.6)),
+              hintStyle: tt.bodyMedium?.copyWith(color: cs.onSurface.withValues(alpha: .6)),
               filled: true,
               // fillColor/borders will come from theme.inputDecorationTheme
             ),
@@ -264,7 +264,7 @@ class _RatingBlockState extends State<_RatingBlock> {
           const SizedBox(height: 4),
           Text(
             _stars == 0 ? 'Tip: Long-press stars to reset.' : 'Selected: $_stars/5',
-            style: tt.bodySmall?.copyWith(color: cs.onSurface.withOpacity(.6)),
+            style: tt.bodySmall?.copyWith(color: cs.onSurface.withValues(alpha: .6)),
           ),
         ],
       ),
@@ -304,7 +304,7 @@ class _StarButtonState extends State<_StarButton> {
         boxShadow: isFilled || _hovering
             ? [
                 BoxShadow(
-                  color: widget.filledColor.withOpacity(.45),
+                  color: widget.filledColor.withValues(alpha: .45),
                   blurRadius: 12,
                   offset: const Offset(0, 3),
                 )

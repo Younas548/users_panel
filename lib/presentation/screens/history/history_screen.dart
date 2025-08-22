@@ -532,7 +532,7 @@ class _HistorySkeleton extends StatelessWidget {
     Widget bar() => Container(
           height: 14,
           decoration: BoxDecoration(
-            color: cs.surfaceVariant.withOpacity(.5),
+            color: cs.surfaceContainerHighest.withValues(alpha: .9),
             borderRadius: BorderRadius.circular(6),
           ),
         );
@@ -546,7 +546,7 @@ class _HistorySkeleton extends StatelessWidget {
             width: 90,
             height: 16,
             decoration: BoxDecoration(
-              color: cs.surfaceVariant.withOpacity(.7),
+              color: cs.surfaceContainerHighest.withValues(alpha: .9),
               borderRadius: BorderRadius.circular(6),
             ),
           ),

@@ -52,7 +52,7 @@ class Gaps {
 /// TEXT THEME (light & dark variants)
 TextTheme buildTextTheme({required bool dark}) {
   final onBg = dark ? ZColors.textOnDark : ZColors.textPrimary;
-  final muted = dark ? ZColors.textOnDark.withOpacity(.72) : ZColors.textMuted;
+  final muted = dark ? ZColors.textOnDark.withValues(alpha: .72) : ZColors.textMuted;
 
   return TextTheme(
     headlineLarge:  TextStyle(fontSize: 28, fontWeight: FontWeight.w700, color: onBg),

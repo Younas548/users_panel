@@ -380,7 +380,7 @@ class _PlaceTile extends StatelessWidget {
                     _highlight(
                       place.address,
                       query,
-                      style: t.bodySmall?.copyWith(color: t.bodySmall?.color?.withOpacity(.8)),
+                      style: t.bodySmall?.copyWith(color: t.bodySmall?.color?.withValues(alpha:.8)),
                       maxLines: 2,
                     ),
                   ],
