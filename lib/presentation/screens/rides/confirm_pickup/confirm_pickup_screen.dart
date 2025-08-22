@@ -36,7 +36,7 @@ class _ConfirmPickupScreenState extends State<ConfirmPickupScreen> {
 
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
-    final tt = theme.textTheme;
+    //final tt = theme.textTheme;
 
     return Scaffold(
       appBar: AppBar(title: const Text('Confirm pickup')),

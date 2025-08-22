@@ -131,7 +131,7 @@ class _RideOptionsScreenState extends State<RideOptionsScreen>
     final rc = ride.ridesCompleted;
     final selectedSubtotal = (selected.base + 120).toDouble();
     final selHasPromo = AppFlags.welcomePromoPreview && PromoPreview.eligible(rc);
-    final selectedDiscount = selHasPromo ? PromoPreview.discount(selectedSubtotal, rc) : 0.0;
+   // final selectedDiscount = selHasPromo ? PromoPreview.discount(selectedSubtotal, rc) : 0.0;
     final selectedTotal    = selHasPromo ? PromoPreview.total(selectedSubtotal, rc)    : selectedSubtotal;
 
     return Scaffold(
@@ -208,7 +208,7 @@ class _RideOptionsScreenState extends State<RideOptionsScreen>
                 // Per-card subtotal/discount/total
                 final subtotal = (opt.base + 120).toDouble();
                 final hasPromo = AppFlags.welcomePromoPreview && PromoPreview.eligible(rc);
-                final discount = hasPromo ? PromoPreview.discount(subtotal, rc) : 0.0;
+               // final discount = hasPromo ? PromoPreview.discount(subtotal, rc) : 0.0;
                 final total    = hasPromo ? PromoPreview.total(subtotal, rc)    : subtotal;
 
                 return InkWell(

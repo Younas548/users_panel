@@ -5,6 +5,7 @@ import '../core/theme/theme_dark.dart';
 import '../core/theme/theme_light.dart';
 
 import '../presentation/state/app_state.dart';
+import '../presentation/state/notification_state.dart';
 import '../presentation/state/permission_state.dart';
 import '../presentation/state/ride_state.dart';
 
@@ -23,6 +24,7 @@ class ZoomigooApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => AppState()),
         ChangeNotifierProvider(create: (_) => PermissionState()),
         ChangeNotifierProvider(create: (_) => RideState()),
+       ChangeNotifierProvider(create: (_) => NotificationState()..load()),
       ],
       child: Consumer<AppState>(
         builder: (context, app, _) {

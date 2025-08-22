@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:permission_handler/permission_handler.dart'; // for openAppSettings()
 import 'package:provider/provider.dart';
+
 import '../../state/app_state.dart';
+import '../../state/notification_state.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -10,9 +13,7 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
-  bool push = true;
-
-  // Quiet hours state
+  // Quiet hours state (local UI only)
   bool quietEnabled = true;
   TimeOfDay quietFrom = const TimeOfDay(hour: 22, minute: 0); // 10:00 PM
   TimeOfDay quietTo   = const TimeOfDay(hour: 7,  minute: 0); // 07:00 AM
@@ -22,10 +23,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     HapticFeedback.selectionClick();
   }
 
-  // Pick a time and update
-  Future<void> _pickQuietTime({
-    required bool isStart,
-  }) async {
+  Future<void> _pickQuietTime({required bool isStart}) async {
     final theme = Theme.of(context);
     final initial = isStart ? quietFrom : quietTo;
 
@@ -33,7 +31,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
       context: context,
       initialTime: initial,
       builder: (ctx, child) {
-        // Theme-aware dialog (optional polish)
         return Theme(
           data: theme.copyWith(
             timePickerTheme: TimePickerThemeData(
@@ -60,18 +57,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
   String _fmt(TimeOfDay t) {
     final localizations = MaterialLocalizations.of(context);
     return localizations.formatTimeOfDay(t, alwaysUse24HourFormat: false);
-  }
-
-  String zColors(Color c) {
-    if (c.value == const Color(0xFF2563EB).value) return 'Ocean Blue';
-    if (c.value == const Color(0xFF22C55E).value) return 'Green';
-    if (c.value == const Color(0xFFF59E0B).value) return 'Amber';
-    if (c.value == const Color(0xFFE11D48).value) return 'Rose';
-    if (c.value == const Color(0xFF8B5CF6).value) return 'Purple';
-    if (c.value == const Color(0xFF06B6D4).value) return 'Cyan';
-    if (c.value == const Color(0xFFDC2626).value) return 'Red';
-    if (c.value == const Color(0xFF0891B2).value) return 'Teal';
-    return '#${c.value.toRadixString(16).padLeft(8, '0').toUpperCase()}';
   }
 
   void _showTerms() {
@@ -111,18 +96,22 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final app = context.watch<AppState>();
+    final app   = context.watch<AppState>();
+    final notif = context.watch<NotificationState>(); // ✅ persisted + OS-sync
     final theme = Theme.of(context);
-    final cs = theme.colorScheme;
+    final cs    = theme.colorScheme;
     final isDark = app.isDark;
+
+    // Quiet-hours controls ko parent toggle ke hisaab se disable dikhao
+    final quietControlsEnabled = notif.enabled && quietEnabled;
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Settings'),
-        backgroundColor: cs.surface,            // visible surface
-        foregroundColor: cs.onSurface,          // clear contrast
-        elevation: 1,                           // subtle separation
-        surfaceTintColor: Colors.transparent,   // avoid extra tint on M3
+        backgroundColor: cs.surface,
+        foregroundColor: cs.onSurface,
+        elevation: 1,
+        surfaceTintColor: Colors.transparent,
         scrolledUnderElevation: 0,
       ),
       body: ListView(
@@ -135,7 +124,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           const SizedBox(height: 12),
 
-          // Appearance (color picker removed, only dark mode)
+          // Appearance
           _SectionCard(
             title: 'Appearance',
             icon: Icons.palette_rounded,
@@ -155,30 +144,52 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
           const SizedBox(height: 12),
 
-          // Notifications + Quiet Hours (now working)
+          // Notifications (persisted + OS permission aware)
           _SectionCard(
             title: 'Notifications',
             icon: Icons.notifications_active_rounded,
             accent: cs.tertiary,
             child: Column(
               children: [
+                // MASTER TOGGLE
                 SwitchListTile.adaptive(
-                  value: push,
-                  onChanged: (v) {
-                    setState(() => push = v);
+                  value: notif.enabled,
+                  onChanged: (v) async {
+                    await context.read<NotificationState>().setEnabled(v);
                     HapticFeedback.selectionClick();
+
+                    // User tried to enable but OS still blocked → guide to Settings
+                    if (v && !context.read<NotificationState>().enabled && context.mounted) {
+                      await showModalBottomSheet(
+                        context: context,
+                        shape: const RoundedRectangleBorder(
+                          borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+                        ),
+                        builder: (_) => const _NotifFixSheet(),
+                      );
+
+                      // Wapas aake OS se sync
+                      if (context.mounted) {
+                        await context.read<NotificationState>().refreshFromOS();
+                      }
+                    }
                   },
                   title: const Text('Push notifications'),
-                  subtitle: Text(push ? 'Enabled' : 'Disabled'),
+                  subtitle: Text(notif.enabled ? 'Enabled' : 'Disabled'),
                   secondary: const Icon(Icons.notifications_outlined),
                 ),
+
                 const Divider(height: 1),
+
+                // Quiet hours (local demo) — disabled if notifications off
                 SwitchListTile.adaptive(
                   value: quietEnabled,
-                  onChanged: (v) {
-                    setState(() => quietEnabled = v);
-                    HapticFeedback.selectionClick();
-                  },
+                  onChanged: notif.enabled
+                      ? (v) {
+                          setState(() => quietEnabled = v);
+                          HapticFeedback.selectionClick();
+                        }
+                      : null,
                   title: const Text('Quiet hours'),
                   subtitle: Text(
                     quietEnabled
@@ -187,23 +198,29 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
                   secondary: const Icon(Icons.do_not_disturb_on_outlined),
                 ),
+
                 if (quietEnabled) const Divider(height: 1),
+
                 if (quietEnabled)
                   ListTile(
+                    enabled: quietControlsEnabled,
                     leading: const Icon(Icons.schedule_outlined),
                     title: const Text('Start time'),
                     subtitle: Text(_fmt(quietFrom)),
                     trailing: const Icon(Icons.chevron_right),
-                    onTap: () => _pickQuietTime(isStart: true),
+                    onTap: quietControlsEnabled ? () => _pickQuietTime(isStart: true) : null,
                   ),
+
                 if (quietEnabled) const Divider(height: 1),
+
                 if (quietEnabled)
                   ListTile(
+                    enabled: quietControlsEnabled,
                     leading: const Icon(Icons.alarm_on_outlined),
                     title: const Text('End time'),
                     subtitle: Text(_fmt(quietTo)),
                     trailing: const Icon(Icons.chevron_right),
-                    onTap: () => _pickQuietTime(isStart: false),
+                    onTap: quietControlsEnabled ? () => _pickQuietTime(isStart: false) : null,
                   ),
               ],
             ),
@@ -216,8 +233,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
             title: 'About',
             icon: Icons.info_outline_rounded,
             accent: cs.secondary,
-            child: Column(
-              children: const [
+            child: const Column(
+              children: [
                 ListTile(
                   leading: Icon(Icons.badge_outlined),
                   title: Text('Version'),
@@ -229,7 +246,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
           const SizedBox(height: 24),
 
-          // Footer: Terms of Service at bottom
+          // Terms of Service
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: InkWell(
@@ -317,6 +334,7 @@ class _Header extends StatelessWidget {
             onSelectionChanged: (s) => onToggle(s.first),
             style: ButtonStyle(
               visualDensity: VisualDensity.compact,
+
               padding: WidgetStateProperty.all(const EdgeInsets.symmetric(horizontal: 8)),
               backgroundColor: WidgetStateProperty.resolveWith(
                 (states) => states.contains(WidgetState.selected)
@@ -384,6 +402,50 @@ class _SectionCard extends StatelessWidget {
           ),
           const Divider(height: 1),
           child,
+        ],
+      ),
+    );
+  }
+}
+
+// ---------- Bottom sheet to guide user to OS settings ----------
+class _NotifFixSheet extends StatelessWidget {
+  const _NotifFixSheet();
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 20),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text('Turn on notifications',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
+          const SizedBox(height: 6),
+          const Text('Allow notifications from system settings to get ride updates and driver status.'),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Not now'),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: ElevatedButton.icon(
+                  icon: const Icon(Icons.settings),
+                  label: const Text('Open Settings'),
+                  onPressed: () async {
+                    Navigator.pop(context);
+                    await openAppSettings(); // permission_handler
+                  },
+                ),
+              ),
+            ],
+          ),
         ],
       ),
     );
